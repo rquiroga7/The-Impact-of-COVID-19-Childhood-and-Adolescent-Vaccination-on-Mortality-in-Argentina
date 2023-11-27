@@ -13,16 +13,22 @@ library(patchwork)
 library(highcharter)
 library(cowplot)
 library(dunnr)
+library(readr)
 
 #CARGO BASE
 
-data1 <- read_excel("covid_pediatricos_1.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "text", rep("text", 20),"date"))
-data1$FECHA_FALLECIMIENTO<-as.Date(data1$FECHA_FALLECIMIENTO,format="%d/%m/%Y")
-data2 <- read_excel("covid_pediatricos_2.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "date", "text","date","text"))
-data1b<-data1[,c(1,3,7,11,32)]
-data2b<-data2[,c(1,3,7,11,13)]
-names(data2b)<-names(data1b)
-data<-rbind(data1b,data2b)
+#Only run if data.zip is not in the working directory
+if(!file.exists("data.gz")){
+    data1 <- read_excel("covid_pediatricos_1.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "text", rep("text", 20),"date"))
+    data1$FECHA_FALLECIMIENTO<-as.Date(data1$FECHA_FALLECIMIENTO,format="%d/%m/%Y")
+    data2 <- read_excel("covid_pediatricos_2.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "date", "text","date","text"))
+    data1b<-data1[,c(1,3,7,11,32)]
+    data2b<-data2[,c(1,3,7,11,13)]
+    names(data2b)<-names(data1b)
+    data<-rbind(data1b,data2b)
+    write_csv(data,"data.gz",col_names = TRUE)
+}
+data<-read_csv("data.gz")
 
 #for each unique value of IDEVENTOCASO, get the row with a date in the column FECHA_FALLECIMIENTO, else get first row
 datad<-data %>% group_by(IDEVENTOCASO) %>% mutate(FECHA_FALLECIMIENTO=ifelse(sum(!is.na(FECHA_FALLECIMIENTO))>0,FECHA_FALLECIMIENTO[!is.na(FECHA_FALLECIMIENTO)],FECHA_FALLECIMIENTO[1])) %>% ungroup() %>% distinct(IDEVENTOCASO,.keep_all = TRUE)
@@ -92,8 +98,8 @@ cases<-monthly_cases %>%
 #linea de tiempo
 timeline_data <- data.frame(event = c("Restricted access to testing",  "Widely Available Testing", "Limited Testing","Economic assistance to citizens","Economic assistance to companies","Remote Schooling", "On-site schooling with facemasks","On-site schooling",   "Partial School closure","Lockdown",  "Partial Lockdown", "Social distancing","12-17 year olds","3-11 year olds", "6 months - 2 year olds", "Gamma+Lambda", "Delta", "Omicron","BA.2","BA.4/BA.5","BQ.1*","Unknown"),
                             group = c("Testing",                      "Testing",                  "Testing",        "Social Assistance",              "Social Assistance",                "NPIs",             "NPIs",                            "NPIs",                "NPIs",                  "NPIs",      "NPIs",             "NPIs",             "Vaccination","Vaccination", "Vaccination", "Dominant Variants", "Dominant Variants", "Dominant Variants", "Dominant Variants", "Dominant Variants", "Dominant Variants","Dominant Variants"),
-                            start = c("2022-04-01",                   "2020-11-01",               "2020-03-01",     "2020-03-23",                     "2020-04-01",                     "2020-03-16",       "2021-03-01",                      "2022-04-06",          "2021-04-19",            "2020-03-20","2020-06-08",       "2020-10-14",       "2021-07-08","2021-10-05", "2022-07-08", "2021-03-29", "2021-10-11", "2021-12-20","2022-04-11","2022-06-20","2022-11-07","2020-03-01"), 
-                            end   = c("2022-12-31",                   "2022-03-31",               "2020-10-31",     "2020-08-30",                     "2020-12-31",                     "2021-02-28",       "2022-04-06",                      "2022-12-31",          "2021-04-30",            "2020-06-09","2020-10-15",       "2021-08-18",       "2023-01-01","2023-01-01", "2023-01-01", "2021-10-12", "2021-12-21","2022-04-12","2022-06-21","2022-11-08","2023-01-01","2021-03-30"),
+                            start = c("2022-04-01",                   "2020-11-01",               "2020-03-01",     "2020-03-23",                     "2020-04-01",                     "2020-03-16",       "2021-03-01",                      "2021-11-17",          "2021-04-19",            "2020-03-20","2020-06-08",       "2020-10-14",       "2021-07-08","2021-10-05", "2022-07-08", "2021-03-29", "2021-10-11", "2021-12-20","2022-04-11","2022-06-20","2022-11-07","2020-03-01"), 
+                            end   = c("2022-12-31",                   "2022-03-31",               "2020-10-31",     "2020-08-30",                     "2020-12-31",                     "2021-02-28",       "2021-11-16",                      "2022-12-31",          "2021-04-30",            "2020-06-09","2020-10-15",       "2021-08-18",       "2023-01-01","2023-01-01", "2023-01-01", "2021-10-12", "2021-12-21","2022-04-12","2022-06-21","2022-11-08","2023-01-01","2021-03-30"),
                             #color = c("#CC79A7","#56B4E9", "#009E73", "#0072B2", "#D55E00", "#999999"), 
                             optimise_y = TRUE,
                             show_labels = FALSE,
