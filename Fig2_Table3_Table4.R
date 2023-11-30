@@ -26,7 +26,6 @@ data$FECHA_FALLECIMIENTO[data$IDEVENTOCASO==3616406]<-as.Date("2022-10-19")
 #IDEVENTOCASO =  3616406, change FECHA_FALLECIMIENTO from 2021-07-23 to 2022-07-23
 data$FECHA_FALLECIMIENTO[data$IDEVENTOCASO==16177350]<-as.Date("2022-07-23")
 data3<-data %>% group_by(grupo_etario,FECHA_FALLECIMIENTO) %>% summarise(count=n()) %>% complete(FECHA_FALLECIMIENTO = seq.Date(as.Date("2020-01-01"), as.Date("2022-12-31"), by = "day"),fill = list(count = 0)) %>% arrange(FECHA_FALLECIMIENTO) %>% mutate(cumcount=cumsum(count))
-#data4<-data %>% mutate(vac=ifelse(vac=="2da" | vac=="refuerzo","vac","novac")) %>% group_by(vac,grupo_etario,FECHA_FALLECIMIENTO) %>% summarise(count=n()) %>% complete(data=.,FECHA_FALLECIMIENTO = seq.Date(as.Date("2020-01-01"), as.Date("2022-12-31"), by = "day"),fill = list(count = 0)) %>% arrange(FECHA_FALLECIMIENTO) %>% mutate(cumcount=cumsum(count))
 death_data4<-data %>% mutate(vac=ifelse(vac=="2da" | vac=="refuerzo","d2plus",ifelse(vac=="1ra" ,"d1","d0"))) %>% group_by(vac,grupo_etario,FECHA_FALLECIMIENTO) %>% summarise(count=n()) %>% complete(data=.,FECHA_FALLECIMIENTO = seq.Date(as.Date("2020-01-01"), as.Date("2022-12-31"), by = "day"),fill = list(count = 0)) %>% arrange(FECHA_FALLECIMIENTO)
 death_data4$vac<-as.factor(death_data4$vac)
 
@@ -164,7 +163,6 @@ levels(vac_df3$grupo_etario)[1]<-"3-11"
 #Merge death_data5 and poblacion6
 names(death_data5)<-c("grupo_etario","fecha_fallecimiento","d0","d1","d2plus","cum_0","cum_1","cum_2")
 death_data6<-merge(death_data5,poblacion6,by="grupo_etario") %>% arrange(fecha_fallecimiento)
-#Join data3 and final_df4
 death_data7<-death_data6 %>% left_join(vac_df3,by = c("fecha_fallecimiento" = "fecha_aplicacion","grupo_etario"="grupo_etario")) %>% arrange(fecha_fallecimiento)
 #sort death_data7c grupo_etario to "0-2","3-11","12-17"
 death_data7$grupo_etario<-factor(death_data7$grupo_etario,levels=c("0-2","3-11","12-17"))
@@ -306,20 +304,16 @@ kable_out <- kable(death_data8b, caption = "Deaths by year, age group, vaccinati
 readr::write_file(kable_out, "Table3.html")
 
 
-#For data3, count rows where ALL of columns 13-31 have 0 value
-cuenta <- data3 %>%  filter(rowSums(data3[, 13:31] == 1) == 0)
-View(cuenta)
-
 ###Create table 4, comorbilities
 idfall1<-data1 %>% filter(FECHA_FALLECIMIENTO > as.Date("2020-01-01")) %>% dplyr::pull(IDEVENTOCASO)
-data3<-data1 %>% 
+data4<-data1 %>% 
 filter(IDEVENTOCASO %in% idfall1) %>%
 #If the sum of columns 13:31 equals 0, then SIN_COMORBILIDAD =1, else SIN_COMORBILIDAD = 0
 mutate(NOREPORTADO = ifelse(rowSums(.[, 13:31] == 1) == 0, 1, 0))
 
 #Count number of rows with value 1 in each of columns 13-31
-counts <- colSums(data3[, c(13:31,33)] == 1)
-names<-colnames(data3[, c(13:31,33)])
+counts <- colSums(data4[, c(13:31,33)] == 1)
+names<-colnames(data4[, c(13:31,33)])
 counts_df <- data.frame(COMORBILIDAD = names, Count = counts,row.names = NULL) %>% arrange(-Count)
 
 #Make list of IDEVENTOCASO
