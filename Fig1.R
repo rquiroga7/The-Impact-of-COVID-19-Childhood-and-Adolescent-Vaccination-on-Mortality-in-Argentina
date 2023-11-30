@@ -1,8 +1,3 @@
-#en este script genero los graficos de muertes en infantes total por grupo etario
-#cargo los paquetes
-#install.packages("ggplot2")
-#install.packages("dplyr")
-#install.packages("extrafont")
 library(readxl)
 library(extrafont)
 library(ggplot2)
@@ -30,10 +25,10 @@ if(!file.exists("data.gz")){
 }
 data<-read_csv("data.gz")
 
-#for each unique value of IDEVENTOCASO, get the row with a date in the column FECHA_FALLECIMIENTO, else get first row
-datad<-data %>% group_by(IDEVENTOCASO) %>% mutate(FECHA_FALLECIMIENTO=ifelse(sum(!is.na(FECHA_FALLECIMIENTO))>0,FECHA_FALLECIMIENTO[!is.na(FECHA_FALLECIMIENTO)],FECHA_FALLECIMIENTO[1])) %>% ungroup() %>% distinct(IDEVENTOCASO,.keep_all = TRUE)
+#for each unique value of IDEVENTOCASO, get the row with a date in the column FECHA_FALLECIMIENTO, else get first row, do not break date format
+datad<-data %>% group_by(IDEVENTOCASO) %>% mutate(FECHA_FALLECIMIENTO=as.Date(ifelse(sum(!is.na(FECHA_FALLECIMIENTO))>0,FECHA_FALLECIMIENTO[!is.na(FECHA_FALLECIMIENTO)],FECHA_FALLECIMIENTO[1]))) %>% ungroup() %>% distinct(IDEVENTOCASO,.keep_all = TRUE)
 #create grupo_etario column using case_when function
-datad<-datad %>% mutate(grupo_etario=case_when(EDAD_APERTURA<3 ~ "0-2",EDAD_APERTURA>=3 & EDAD_APERTURA<6 ~ "3-5",EDAD_APERTURA>=6 & EDAD_APERTURA<13 ~ "6-12",EDAD_APERTURA>=13 & EDAD_APERTURA<18 ~ "13-17"))
+datad<-datad %>% mutate(grupo_etario=case_when(EDAD_APERTURA<3 ~ "0-2",EDAD_APERTURA>=3 & EDAD_APERTURA<12 ~ "3-11",EDAD_APERTURA>=12 & EDAD_APERTURA<18 ~ "12-17"))
 
 #Count number of rows in datad by month, save to monthly_cases dataframe
 monthly_deaths <- datad %>% 
@@ -47,7 +42,6 @@ monthly_deaths <- datad %>%
   #mutate FECHA_FALLECIMIENTO to the first day of the month
   count() %>%
   mutate(fecha=as.Date(paste0(Periodos,"-01"))) 
-
   monthly_cases <- datad %>% 
   ungroup() %>% 
   group_by(grupo_etario) %>%
@@ -58,16 +52,21 @@ monthly_deaths <- datad %>%
   mutate(fecha=as.Date(paste0(Periodos,"-01"))) 
 
 
+library(openxlsx)
+#Write xlsx file with monthly cases and deaths
+write.xlsx(monthly_cases,"monthly_cases.xlsx")
+write.xlsx(monthly_deaths,"monthly_deaths.xlsx")
+
 #defino la paleta de colores para el grafico
 #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") #toda la gama
-cbPalette <- c("#56B4E9", "#009E73", "#D55E00", "#CC79A7")
+cbPalette <- c("#56B4E9", "#009E73", "#D55E00")
 
 
 
 #grafico barras apilado
 deaths<-monthly_deaths %>% 
   ggplot() +
-  geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("13-17","6-12","3-5", "0-2")))) +
+  geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("12-17","3-11","0-2")))) +
   geom_text(family="Times New Roman",aes(fecha, label_y, label = label_y), vjust = -1,
             data = . %>% group_by(fecha) %>% summarise(label_y = sum(n))) +
   scale_fill_manual(values=cbPalette) +
@@ -82,7 +81,7 @@ deaths<-monthly_deaths %>%
 
 cases<-monthly_cases %>% 
   ggplot() +
-  geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("13-17","6-12","3-5", "0-2")))) +
+  geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("12-17","3-11","0-2")))) +
   geom_text(family="Times New Roman",aes(fecha, label_y, label = label_y), vjust = 0.5, hjust=0, angle=90,
             data = . %>% group_by(fecha) %>% summarise(label_y = sum(n))) +
   scale_fill_manual(values=cbPalette) +
