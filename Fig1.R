@@ -26,7 +26,12 @@ if(!file.exists("data.gz")){
 data<-read_csv("data.gz")
 
 #for each unique value of IDEVENTOCASO, get the row with a date in the column FECHA_FALLECIMIENTO, else get first row, do not break date format
-datad<-data %>% group_by(IDEVENTOCASO) %>% mutate(FECHA_FALLECIMIENTO=as.Date(ifelse(sum(!is.na(FECHA_FALLECIMIENTO))>0,FECHA_FALLECIMIENTO[!is.na(FECHA_FALLECIMIENTO)],FECHA_FALLECIMIENTO[1]))) %>% ungroup() %>% distinct(IDEVENTOCASO,.keep_all = TRUE)
+datad <- data %>%
+  group_by(IDEVENTOCASO) %>%
+  mutate(FECHA_FALLECIMIENTO = ifelse(any(!is.na(FECHA_FALLECIMIENTO)), FECHA_FALLECIMIENTO[!is.na(FECHA_FALLECIMIENTO)][1], FECHA_FALLECIMIENTO[1])) %>%
+  mutate(FECHA_FALLECIMIENTO = as.Date(FECHA_FALLECIMIENTO)) %>%
+  ungroup() %>%
+  distinct(IDEVENTOCASO, .keep_all = TRUE)
 #create grupo_etario column using case_when function
 datad<-datad %>% mutate(grupo_etario=case_when(EDAD_APERTURA<3 ~ "0-2",EDAD_APERTURA>=3 & EDAD_APERTURA<12 ~ "3-11",EDAD_APERTURA>=12 & EDAD_APERTURA<18 ~ "12-17"))
 
