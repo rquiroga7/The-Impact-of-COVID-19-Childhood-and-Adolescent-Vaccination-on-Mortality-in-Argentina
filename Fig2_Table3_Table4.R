@@ -96,9 +96,9 @@ poblacion4b <- poblacion2 %>%
 poblacion5<-bind_rows(poblacion3,poblacion4,poblacion4b)
 poblacion6<-poblacion5 %>% group_by(grupo_etario) %>% summarise(poblacion=sum(poblacion))
 
-#If grouped_df.gz does not exist:
+# If grouped_df.gz does not exist:
 if (!file.exists("grouped_df.gz")) {
-  #Calculate number of vax and unvax for each day and age group
+  # Calculate number of vax and unvax for each day and age group
   datos <- read_csv("datos_nomivac_covid19_pediatrico.zip",
                     col_types = cols(
                       jurisdiccion_residencia = col_factor(),
@@ -110,27 +110,29 @@ if (!file.exists("grouped_df.gz")) {
                       id_persona_dw = col_factor()
                     ))
 
-  #Change instances of nombre_dosis_generica which are "Adicional" to "Refuerzo"
+  # Change instances of nombre_dosis_generica which are "Adicional" to "Refuerzo"
   datos$nombre_dosis_generica[datos$nombre_dosis_generica == "Adicional"] <- "Refuerzo"
   datos$nombre_dosis_generica[datos$nombre_dosis_generica == "Unica"] <- "1ra"
-  #Remove all instances of jurisdiccion_residencia which are "S.I." and the level from the factor
+  # Remove all instances of jurisdiccion_residencia which are "S.I." and the level from the factor
   datos <- datos %>% filter(jurisdiccion_residencia != "S.I.")
   datos$jurisdiccion_residencia <- droplevels(datos$jurisdiccion_residencia)
 
-  #Create a new dataframe which only retains the earliest instance of the combination of id_persona_dw and nombre_dosis_generica
+  # Create a new dataframe which only retains the earliest instance of the combination of id_persona_dw and nombre_dosis_generica
   datos <- datos %>%
     group_by(id_persona_dw, nombre_dosis_generica) %>%
     filter(fecha_aplicacion == min(fecha_aplicacion)) %>%
     ungroup()
-# Group the datos dataframe by grupo_etario, and nombre_dosis_generica
+
+  # Group the datos dataframe by grupo_etario, and nombre_dosis_generica
   grouped_df <- datos %>%
     group_by(grupo_etario, nombre_dosis_generica, fecha_aplicacion) %>%
     summarise(count = n()) %>%
     ungroup()
 
-  write_csv(grouped_df,"grouped_df.gz")
+  write_csv(grouped_df, "grouped_df.gz")
 }
 
+grouped_df<-read_csv("grouped_df.gz")
 # For each group, create a new column that contains the cumulative sum of the number of rows for each day
 date_seq <- seq(as.Date("2020-01-01"), as.Date("2022-12-31"), by = "day")
 grouped_df_complete <- grouped_df %>%
