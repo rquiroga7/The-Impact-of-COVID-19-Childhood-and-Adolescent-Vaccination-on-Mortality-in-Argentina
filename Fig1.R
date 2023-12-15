@@ -59,8 +59,8 @@ monthly_deaths <- datad %>%
 
 library(openxlsx)
 #Write xlsx file with monthly cases and deaths
-write.xlsx(monthly_cases,"monthly_cases.xlsx")
-write.xlsx(monthly_deaths,"monthly_deaths.xlsx")
+write.xlsx(monthly_cases,"Supp_Table_3_monthly_cases.xlsx")
+write.xlsx(monthly_deaths,"Supp_Table_4_monthly_deaths.xlsx")
 
 #defino la paleta de colores para el grafico
 #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") #toda la gama

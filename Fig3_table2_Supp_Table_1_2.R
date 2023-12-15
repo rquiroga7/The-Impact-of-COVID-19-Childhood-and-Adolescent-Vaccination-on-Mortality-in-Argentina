@@ -8,7 +8,7 @@ library(scico)
 
 
 
-datos <- read_csv("0_a_14_anios_defunciones-ocurridas-y-registradas-en-la-republica-argentina-anos-2005-2021.zip", locale = locale(encoding = "ISO-8859-1"))
+datos <- read_csv("./Data/0_a_14_anios_defunciones-ocurridas-y-registradas-en-la-republica-argentina-anos-2005-2021.zip", locale = locale(encoding = "ISO-8859-1"))
 names(datos)[3]<-"jurisdiccion_residencia_nombre"
 #group datos by jurisdiccion_residencia_nombre, grupo_etario, anio, cie10_causa_id and sum cantidad 
 datos2 <- datos %>%
@@ -143,9 +143,10 @@ vacunas_wide2$'Post-vaccine period'[5]<-"-"
 vacunas_wide2$'Annual post-vaccine deaths'[5]<- "-"
 View(vacunas_wide2)
 #Write table to csv
-write_csv(vacunas_wide2,file="0_14_tabla_mortalidad_vacunas.csv")
-write_csv(vacunas_wide2,file="Table2.csv")
-
+#write_csv(vacunas_wide2,file="0_14_tabla_mortalidad_vacunas.csv")
+#write_csv(vacunas_wide2,file="Table2.csv")
+library(openxlsx)
+write.xlsx(vacunas_wide2,file="Table2.xlsx")
 
 
 
@@ -272,8 +273,8 @@ t2021$Rank_2021<-rank(-t2021$Deaths); t2021 <- t2021[,c(3,1,2)]
 infecciosas_resp<-c("Influenza and pneumonia (J09-J18)","COVID-19 (U07)","Chronic lower respiratory diseases (J40-J47)","Infections with a predominantly sexual mode of transmission (A50-A64)","Tuberculosis (A15-A19)","Other bacterial diseases (A20-A49)","Other diseases of the respiratory system (J00-J06,J30-J39,J67,J70-J98)","Other acute lower respiratory infections (J20-J22)","Other and unspecified infectious and parasitic diseases and their sequelae (A00,A05,A20-A36,A42-A44,A48-A49,A54-A79,A81-A82,A85,A86-B04,B06-B09,B25-B49,B55-B99)")
 t2021infresp<-icd10groups %>% filter(ICD10_groups %in% infecciosas_resp & anio_def=="2021" & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
 t2021infresp$Rank_2021<-rank(-t2021infresp$Deaths); t2021infresp <- t2021infresp[,c(3,1,2)]
-write_csv(t2021,file="0_14_tabla_mortalidad_2021.csv")
-write_csv(t2021infresp,file="0_14_tabla_mortalidad_2021_inf_resp.csv")
+#write_csv(t2021,file="0_14_tabla_mortalidad_2021.csv")
+#write_csv(t2021infresp,file="0_14_tabla_mortalidad_2021_inf_resp.csv")
 
 
 
@@ -356,11 +357,11 @@ years<-length(unique(yearly_all$anio_def))
 pal<-scico(20, palette = 'batlow')
 pal <- darken(pal, 0.2)
 bumpplot(yearly_all %>% filter(anio_def>=2015))
-ggsave("0_14_mortality_bumpplot.png", width = 154, height = 154, units = "mm", dpi = 300)
+#ggsave("0_14_mortality_bumpplot.png", width = 154, height = 154, units = "mm", dpi = 300)
 yearly_all$ICD10_groups_nocode <- gsub("\\s\\(.*", "", yearly_all$ICD10_groups_nocode)
 yearly_all$ICD10_groups_nocode <- stringr::str_wrap(yearly_all$ICD10_groups_nocode, 23)
 bumpplotnocode(yearly_all %>% filter(anio_def>=2015))
-ggsave("0_14_mortality_bumpplot_nocode.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
+#ggsave("0_14_mortality_bumpplot_nocode.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
 
 
 #Get only respiratory and infectious diseases
@@ -375,11 +376,11 @@ yearly_inf$ICD10_groups_nocode <- yearly_inf$ICD10_groups
 yearly_inf$ICD10_groups <- gsub(",", ", ", yearly_inf$ICD10_groups)
 yearly_inf$ICD10_groups <- stringr::str_wrap(yearly_inf$ICD10_groups, 23)
 bumpplot(yearly_inf %>% filter(anio_def>=2015))
-ggsave("0_14_mortality_inf_bumpplot.png", width = 154, height = 154, units = "mm", dpi = 300)
+#ggsave("0_14_mortality_inf_bumpplot.png", width = 154, height = 154, units = "mm", dpi = 300)
 yearly_inf$ICD10_groups_nocode <- gsub("\\s\\(.*", "", yearly_inf$ICD10_groups_nocode)
 yearly_inf$ICD10_groups_nocode <- stringr::str_wrap(yearly_inf$ICD10_groups_nocode, 23)
 bumpplotnocode(yearly_inf %>% filter(anio_def>=2015))
-ggsave("0_14_mortality_inf_bumpplot_nocode.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
+#ggsave("0_14_mortality_inf_bumpplot_nocode.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
 ggsave("Fig3.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
 ggsave("Fig3.svg", width = 154, height = 77*1.5, units = "mm", dpi = 300)
 

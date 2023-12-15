@@ -2,6 +2,8 @@ library(readxl)
 library(dplyr)
 library(tidyr)
 library(readr)
+library(ggplot2)
+library(cowplot)
 
 data1 <- read_excel("./Data/fall_1.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "text", rep("text", 31)))
 data1$FECHA_FALLECIMIENTO<-as.Date(data1$FECHA_FALLECIMIENTO,format="%d/%m/%Y")
@@ -38,14 +40,14 @@ death_data5 <- death_data4 %>%
   replace(is.na(.), 0) %>%
   mutate(cum_0 = cumsum(d0), cum_1 = cumsum(d1),cum_2 = cumsum(d2plus))
 
-library(ggplot2)
+
 
 # Create a plot of cumulative deaths by date for each age group
-ggplot(data3, aes(x = FECHA_FALLECIMIENTO, y = cumcount, color = grupo_etario)) +
-  geom_line() +
-  labs(x = "Date", y = "Cumulative deaths", color = "Age group") +
-  scale_color_manual(values = c("0-2" = "red", "3-11" = "blue", "12-17" = "green")) +
-  theme_light()
+#ggplot(data3, aes(x = FECHA_FALLECIMIENTO, y = cumcount, color = grupo_etario)) +
+#  geom_line() +
+#  labs(x = "Date", y = "Cumulative deaths", color = "Age group") +
+#  scale_color_manual(values = c("0-2" = "red", "3-11" = "blue", "12-17" = "green")) +
+#  theme_light()
 
 #Get population numbers
 poblacion <- read_csv("./Data/estructura_de_poblacion_identificada_residiendo_en_argentina.csv",
@@ -131,8 +133,13 @@ if (!file.exists("./Data/grouped_df.gz")) {
 
   write_csv(grouped_df, "./Data/grouped_df.gz")
 }
+grouped_df<-read_csv("./Data/grouped_df.gz",col_types = cols(
+    grupo_etario = col_factor(),
+    nombre_dosis_generica = col_factor(),
+    fecha_aplicacion = col_date(format = "%Y-%m-%d"),
+    count = col_integer()
+  ))
 
-grouped_df<-read_csv("./Data/grouped_df.gz")
 # For each group, create a new column that contains the cumulative sum of the number of rows for each day
 date_seq <- seq(as.Date("2020-01-01"), as.Date("2022-12-31"), by = "day")
 grouped_df_complete <- grouped_df %>%
@@ -217,18 +224,18 @@ mort_vac_plot<-ggplot(death_data7c %>% filter(vac =="0 dose" | (vac== "1 dose" &
   labs(tag="B")+
     scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
   #Save png
-mort_vac_plot
-ggsave("cum_incidence_by_vac_status_0_1_2.png", width = 154, height = 77, units = "mm", dpi = 300)
+#mort_vac_plot
+#ggsave("cum_incidence_by_vac_status_0_1_2.png", width = 154, height = 77, units = "mm", dpi = 300)
 
 #Create national vaccination plot
 
 # Create a new dataframe that contains all possible combinations of jurisdiccion_residencia, grupo_etario, nombre_dosis_generica, and dates within the range of the fecha_aplicacion column in datos
-date_range <- datos %>%
+date_range <- grouped_df %>%
   select(fecha_aplicacion) %>%
   summarize(start_date = min(fecha_aplicacion), end_date = max(fecha_aplicacion))
 
-grupo_etario <- unique(datos$grupo_etario)
-nombre_dosis_generica <- unique(datos$nombre_dosis_generica)
+grupo_etario <- unique(grouped_df$grupo_etario)
+nombre_dosis_generica <- unique(grouped_df$nombre_dosis_generica)
 
 date_df <- expand.grid(grupo_etario, nombre_dosis_generica, fecha_aplicacion = seq(date_range$start_date, date_range$end_date, by = "day"))
 
@@ -273,8 +280,8 @@ plot_vac <- ggplot(final_df2, aes(x = fecha_aplicacion, y = pct_vac, color = nom
   theme(text = element_text(family = "Times New Roman"),strip.background = element_rect(fill="gray90",color="black",size=1),strip.text = element_text(face="bold", color="black"),plot.title = element_text(hjust = 0.5),legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   labs(tag="A")+
   scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
-plot_vac
-ggsave("vaccination_plot.png", width = 154, height = 77, units = "mm", dpi = 300)
+#plot_vac
+#ggsave("vaccination_plot.png", width = 154, height = 77, units = "mm", dpi = 300)
 
 fig2<-plot_grid(plot_vac,mort_vac_plot, ncol=1, align="v")
 
@@ -336,4 +343,6 @@ counts3[is.na(counts3)] <- 0
 counts3<- counts3%>% mutate(Count=Count+count) %>% arrange(-Count) %>% dplyr::select(COMORBILIDAD,Count) %>% filter(Count>0)
 names(counts3)<-c("Comorbidity","Count")
 
-write_csv(counts3,"Table4.csv")
+library(openxlsx)
+#write_csv(counts3,"Table4.csv")
+write.xlsx(counts3,"Table4.xlsx")
