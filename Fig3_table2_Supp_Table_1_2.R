@@ -393,8 +393,10 @@ table_yearly_inf <- yearly_inf %>%
   arrange(anio_def, ICD10_groups) %>%
   pivot_wider(names_from = anio_def, values_from = Deaths,values_fill = 0)
 
-  
-write_excel_csv(table_yearly_inf,file="Supp_Table_1.xlsx")
+#Write excel file
+library(xlsx)
+#write_excel(table_yearly_inf,file="Supp_Table_1.xlsx")
+write.xlsx(table_yearly_inf, file = "Supp_Table_1.xlsx", sheetName = "Sheet1", append = TRUE, rowNames = FALSE)
 
 
 #Generate table of deaths by group
@@ -406,4 +408,5 @@ table_yearly_all <- yearly_all %>%
   pivot_wider(names_from = anio_def, values_from = Deaths,values_fill = 0)
 
   
-write_excel_csv(table_yearly_all,file="Supp_Table_2.xlsx")
+#write_excel_csv(table_yearly_all,file="Supp_Table_2.xlsx")
+write.xlsx(table_yearly_all, file = "Supp_Table_2.xlsx", sheetName = "Sheet1", append = TRUE, rowNames = FALSE)

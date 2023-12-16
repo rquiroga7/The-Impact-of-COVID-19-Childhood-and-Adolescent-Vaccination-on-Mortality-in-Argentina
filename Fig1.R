@@ -57,7 +57,8 @@ monthly_deaths <- datad %>%
   mutate(fecha=as.Date(paste0(Periodos,"-01"))) 
 
 
-library(openxlsx)
+library(xlsx)
+
 #Write xlsx file with monthly cases and deaths
 write.xlsx(monthly_cases,"Supp_Table_3_monthly_cases.xlsx")
 write.xlsx(monthly_deaths,"Supp_Table_4_monthly_deaths.xlsx")
