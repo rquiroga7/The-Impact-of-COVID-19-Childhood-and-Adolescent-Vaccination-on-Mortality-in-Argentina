@@ -184,23 +184,8 @@ final_df4 <- final_df2 %>%
 
 #STATIC MAP
 
-create_map <- function(data) {
-  levels(data$jurisdiccion_residencia)[16] <- "Ciudad Autónoma de Buenos Aires"
-  levels(data$jurisdiccion_residencia)[24] <- "Tierra del Fuego, Antártida e Islas del Atlántico Sur"
-  
+create_map <- function(argentina_data,titulo="") {
   # Merge data frame with shapefile
-  argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_residencia"))
-  
-  # Create inset map for Ciudad de Buenos Aires
-  inset <- argentina_data %>% filter(NAM == "Ciudad Autónoma de Buenos Aires") %>%
-    ggplot() + 
-    geom_sf(aes(fill = cumulative_count_perc)) +
-    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(20, 90)) +
-    labs(x = NULL, y = NULL) +
-    theme_test() +
-    theme(text = element_text(family = "Times New Roman"), legend.position = "none", axis.ticks = element_blank(), axis.text = element_blank()) +
-    coord_sf(expand = FALSE)
-  
   # Create choropleth map
   ss <- ggplot() +
     geom_sf(data = argentina_data, aes(fill = cumulative_count_perc)) +
@@ -208,7 +193,7 @@ create_map <- function(data) {
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     labs(x = "longitude", y = "latitude") +
-    labs(title = "Under 12 year olds vaccinated with at least 2 doses as of 2023-01-01", fill = "Percentage of\npopulation") +
+    labs(title = titulo, fill = "Percentage of\npopulation") +
     xlim(c(-73, -52)) +
     ylim(c(-56, -22)) +
     theme_light() +
@@ -236,25 +221,42 @@ create_map <- function(data) {
     theme(text = element_text(family = "Times"), legend.position = "right", legend.direction = "vertical", legend.box = "vertical")
   
   # Print the choropleth map
-  print(ss)
+  return(ss)
 }
 
 
 # Load shapefile of Argentina
-unzip("./provincias.zip")
+unzip("./Data/provincias.zip")
 argentina <- st_read("./provincias.shp")
 # Load data frame with values to map
-data <- final_df4 %>% filter(grupo_etario=="<12" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01'))
+data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="<12" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01')) 
+levels(data$jurisdiccion_residencia)[2] <- "Ciudad Autónoma de Buenos Aires"
+levels(data$jurisdiccion_residencia)[23] <- "Tierra del Fuego, Antártida e Islas del Atlántico Sur"
+argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_residencia"))
+  
+  # Create inset map for Ciudad de Buenos Aires
+  inset <- argentina_data %>% filter(NAM == "Ciudad Autónoma de Buenos Aires") %>%
+    ggplot() + 
+    geom_sf(aes(fill = cumulative_count_perc)) +
+    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(20, 90)) +
+    labs(x = NULL, y = NULL) +
+    theme_test() +
+    theme(text = element_text(family = "Times New Roman"), legend.position = "none", axis.ticks = element_blank(), axis.text = element_blank()) +
+    coord_sf(expand = FALSE)
 # Create map for under 12 year olds
-create_map(data)
+ss<-create_map(argentina_data,titulo="0-11 year olds vaccinated with at least 2 doses as of 2023-01-01")
 vp <- viewport()
 sbvp <- viewport(0.57, 0.408, width = 0.15, height = 0.15)
 pdf("Supp_Fig_2A.pdf", width = 15, height = 10); print(ss) ; print(inset, vp=sbvp); dev.off()
 
 #Create map for 12-17 year olds
-
-data <- final_df4 %>% filter(grupo_etario=="12-17" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01'))
-create_map(data)
+data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="12-17" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01'))
+levels(data$jurisdiccion_residencia)[2] <- "Ciudad Autónoma de Buenos Aires"
+levels(data$jurisdiccion_residencia)[23] <- "Tierra del Fuego, Antártida e Islas del Atlántico Sur"
+argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_residencia"))
+ss2<-create_map(argentina_data,titulo="12-17 year olds vaccinated with at least 2 doses as of 2023-01-01")
 vp <- viewport()
 sbvp <- viewport(0.57, 0.408, width = 0.15, height = 0.15)
-pdf("Supp_Fig_2B.pdf", width = 15, height = 10); print(ss) ; print(inset, vp=sbvp); dev.off()
+pdf("Supp_Fig_2B.pdf", width = 15, height = 10); print(ss2) ; print(inset, vp=sbvp); dev.off()
+
+
