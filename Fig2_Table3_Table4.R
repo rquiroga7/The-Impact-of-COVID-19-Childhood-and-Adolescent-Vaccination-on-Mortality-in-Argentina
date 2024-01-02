@@ -318,31 +318,74 @@ idfall1<-data1 %>% filter(FECHA_FALLECIMIENTO > as.Date("2020-01-01")) %>% dplyr
 data4<-data1 %>% 
 filter(IDEVENTOCASO %in% idfall1) %>%
 #If the sum of columns 13:31 equals 0, then SIN_COMORBILIDAD =1, else SIN_COMORBILIDAD = 0
-mutate(NOREPORTADO = ifelse(rowSums(.[, 13:31] == 1) == 0, 1, 0))
+mutate(NOREPORTADO = ifelse(rowSums(.[, c(13:31)] >= 1) == 0, 1, 0)) %>%
+#create new column named COMORBILIDAD, which is the name of the column with value 1, 
+mutate(COMORBILIDAD = names(.[, c(13:31)])[max.col(.[, c(13:31)])]) %>%
+#in case of more than 1 column with value 1, then COMORBILIDAD = "MULTIPLE"
+mutate(COMORBILIDAD = ifelse(rowSums(.[, c(13:27,29,30,31)] >= 1) > 1, "MULTIPLE", COMORBILIDAD)) %>%
+#IF SIN_COMORBILIDAD = 1, then COMORBILIDAD = "NOREPORTADO", else COMORBILIDAD=COMORBILIDAD
+mutate(COMORBILIDAD = ifelse(NOREPORTADO == 1, "NOREPORTADO", COMORBILIDAD)) 
 
-#Count number of rows with value 1 in each of columns 13-31
-counts <- colSums(data4[, c(13:31,33)] == 1)
-names<-colnames(data4[, c(13:31,33)])
-counts_df <- data.frame(COMORBILIDAD = names, Count = counts,row.names = NULL) %>% arrange(-Count)
-
+data4m<-data4 %>% filter(IDEVENTOCASO %in% idfall1) %>% dplyr::select(IDEVENTOCASO,COMORBILIDAD)
+data4m$COMORBILIDAD<-case_when(data4m$COMORBILIDAD=="NOREPORTADO" ~ "None reported",
+                              data4m$COMORBILIDAD=="OTRA" ~ "Other",
+                              data4m$COMORBILIDAD=="ENF_ONCO_PREVIA" ~ "Oncological disease",
+                              data4m$COMORBILIDAD=="ENF_NEURO_PREVIA" ~ "Neurological disease",
+                              data4m$COMORBILIDAD=="NAC_PREVIA" ~ "Previous community-acquired pneumonia",
+                              data4m$COMORBILIDAD=="PREMATURO" ~ "Preterm birth",
+                              data4m$COMORBILIDAD=="SIN_COMORB" ~ "No comorbidities",
+                              data4m$COMORBILIDAD=="RESPIRATORIA_CRONICA" ~ "Chronic respiratory disease",
+                              data4m$COMORBILIDAD=="HEPATO_CRONICA" ~ "Chronic liver disease",
+                              data4m$COMORBILIDAD=="INMUNOS_CONGENITA" ~ "Congenital or acquired immunosupression",
+                              data4m$COMORBILIDAD=="INSF_CARDIACA" ~ "Cardiac insufficiency",
+                              data4m$COMORBILIDAD=="INSF_RENAL" ~ "Chronic renal insufficiency",
+                              data4m$COMORBILIDAD=="TBC" ~ "Tuberculosis",
+                              data4m$COMORBILIDAD=="MULTIPLE" ~ "Multiple comorbidities",
+                              data4m$COMORBILIDAD=="ASMA" ~ "Asthma",
+                              data4m$COMORBILIDAD=="DIALISIS_AGUDA" ~ "Dialisis",
+                              data4m$COMORBILIDAD=="DIALISIS_CRONICA" ~ "Dialisis",
+                              data4m$COMORBILIDAD=="BAJO_PESO" ~ "Low body weight",
+                              data4m$COMORBILIDAD=="OBESIDAD" ~ "Obesity",
+                              data4m$COMORBILIDAD=="DBT" ~ "Diabetes",
+                              data4m$COMORBILIDAD=="HTA" ~ "Arterial hipertension",
+                              data4m$COMORBILIDAD=="EPOC" ~ "Chronic Obstrucive Pulmonary Disease",
+                              data4m$COMORBILIDAD=="BRONQUIO_PREVIA" ~ "Previous bronchiolitis"
+                              )
 #Make list of IDEVENTOCASO
 idfall2<-data2 %>% filter(FECHA_FALLECIMIENTO > as.Date("2020-01-01")) %>% dplyr::pull(IDEVENTOCASO)
+data2m<-data2 %>% filter(IDEVENTOCASO %in% idfall2) %>% dplyr::select(IDEVENTOCASO,COMORBILIDAD)
+data2m$COMORBILIDAD[is.na(data2m$COMORBILIDAD)]<-"NOREPORTADO"
+#If multiple rows have the same IDEVENTOCASO, but different COMORBILIDAD values, then COMORBILIDAD = "MULTIPLE"
+data2m<-data2m %>% group_by(IDEVENTOCASO) %>% mutate(COMORBILIDAD=ifelse(n()>1,"MULTIPLE",COMORBILIDAD)) %>% dplyr::select(IDEVENTOCASO,COMORBILIDAD)
+#Use case_when to translate COMORBILIDAD factor levels
+data2m$COMORBILIDAD<-case_when(data2m$COMORBILIDAD=="NOREPORTADO" ~ "None reported",
+                                data2m$COMORBILIDAD=="Otras (especificar en observaciones)" ~ "Other",
+                                data2m$COMORBILIDAD=="Enfermedad oncológica" ~ "Oncological disease",
+                                data2m$COMORBILIDAD=="Enfermedad neurológica crónica" ~ "Neurological disease",
+                                data2m$COMORBILIDAD=="N.A.C. previa" ~ "Previous community-acquired pneumonia",
+                                data2m$COMORBILIDAD=="Prematuridad" ~ "Preterm birth",
+                                data2m$COMORBILIDAD=="Sin comorbilidades" ~ "No comorbidities",
+                                data2m$COMORBILIDAD=="Enfermedad respiratoria crónica" ~ "Chronic respiratory disease",
+                                data2m$COMORBILIDAD=="Hepatopatía crónica" ~ "Chronic liver disease",
+                                data2m$COMORBILIDAD=="Inmunosupresión congénita o adquirida" ~ "Congenital or acquired immunosupression",
+                                data2m$COMORBILIDAD=="Insuficiencia cardíaca" ~ "Cardiac insufficiency",
+                                data2m$COMORBILIDAD=="Insuficiencia renal crónica" ~ "Chronic renal insufficiency",
+                                data2m$COMORBILIDAD=="Tuberculosis" ~ "Tuberculosis",
+                                data2m$COMORBILIDAD=="MULTIPLE" ~ "Multiple comorbidities"
+                                )
 
-#Count occurence of each value of COMORBILIDAD column in data2
-counts2 <- data2 %>% filter(IDEVENTOCASO %in% idfall2)  %>% group_by(COMORBILIDAD) %>% summarise(count=n()) %>% arrange(-count)
-#Modify NA with "NOREPORTADO"
-counts2$COMORBILIDAD[is.na(counts2$COMORBILIDAD)]<-"NOREPORTADO"
-counts2
+#Merge data2m and data4m
+datam<-rbind(data2m,data4m)
+#View(datam %>% group_by(IDEVENTOCASO) %>% filter(n()>1) %>% arrange(IDEVENTOCASO))
+datam <- datam %>% distinct(IDEVENTOCASO,COMORBILIDAD)
+#Count occurrences of COMORBILIDAD in datam
+counts2 <- datam %>%
+  group_by(COMORBILIDAD) %>%
+  summarise(count = n()) %>% 
+  arrange(-count)
 
-counts_df$COMORBILIDAD<-c("None reported","Neurological disease","Oncological disease","No comorbidities","Congenital or acquired immunosupression","Preterm birth","Cardiac insufficiency","Obesity","Low body weight","Diabetes","Chronic Obstrucive Pulmonary Disease","Chronic renal insufficiency","Asthma","Previous bronchiolitis","Previous community-acquired pneumonia","Arterial hipertension","Acute dialisis","Chronic liver disease","Tuberculosis","Chronic dialisis")
-counts2$COMORBILIDAD<-c("Other","None reported","No comorbidities","Previous community-acquired pneumonia","Chronic respiratory disease","Oncological disease","Neurological disease","Preterm birth","Chronic liver disease","Congenital or acquired immunosupression","Cardiac insufficiency","Chronic renal insufficiency","Tuberculosis")
-
-#Merge and sum counts_df and counts2
-counts3<-merge(counts_df,counts2,by="COMORBILIDAD",all=TRUE)
-counts3[is.na(counts3)] <- 0 
-counts3<- counts3%>% mutate(Count=Count+count) %>% arrange(-Count) %>% dplyr::select(COMORBILIDAD,Count) %>% filter(Count>0)
-names(counts3)<-c("Comorbidity","Count")
+names(counts2)<-c("Comorbidity","Count")
 
 library(openxlsx)
-#write_csv(counts3,"Table4.csv")
-write.xlsx(counts3,"Table4.xlsx")
+#write_csv(counts2,"Table4.csv")
+write.xlsx(counts2,"Table4.xlsx")
