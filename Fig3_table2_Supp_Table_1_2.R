@@ -7,12 +7,12 @@ devtools::install_github("thomasp85/scico")
 library(scico)
 
 
-
-datos <- read_csv("./Data/0_a_14_anios_defunciones-ocurridas-y-registradas-en-la-republica-argentina-anos-2005-2021.zip", locale = locale(encoding = "ISO-8859-1"))
+datos<- read_csv("./Data/defunciones-ocurridas-y-registradas-en-la-republica-argentina-entre-los-anos-2005-2022.csv.gz", locale = locale(encoding = "ISO-8859-1"))
 names(datos)[3]<-"jurisdiccion_residencia_nombre"
 #group datos by jurisdiccion_residencia_nombre, grupo_etario, anio, cie10_causa_id and sum cantidad 
 datos2 <- datos %>%
   group_by(grupo_edad, anio, cie10_causa_id, cie10_clasificacion) %>%
+  filter(grupo_edad == '01.De a 0  a 14 anios') %>%
   summarise(cantidad = sum(cantidad))
 
 #Create a table of the top 10 causes of death by year
@@ -27,7 +27,7 @@ anio_vac=2006
 hepa <- datos2 %>%
   filter(cie10_clasificacion == "Hepatitis aguda tipo A") %>%
   ungroup() %>%
-  complete(anio = 2005:2021) %>%
+  complete(anio = 2005:2022) %>%
   replace_na(list(cantidad = 0)) %>%
   group_by(anio) %>%
   summarise(cantidad = sum(cantidad)) %>%
@@ -47,7 +47,7 @@ anio_vac=2009
 hepb <- datos2 %>%
   filter(cie10_clasificacion == "Hepatitis aguda tipo B") %>%
   ungroup() %>%
-  complete(anio = 2005:2021) %>%
+  complete(anio = 2005:2022) %>%
   replace_na(list(cantidad = 0)) %>%
   group_by(anio) %>%
   summarise(cantidad = sum(cantidad)) %>%
@@ -67,7 +67,7 @@ hepb <- datos2 %>%
 mening <- datos2 %>%
   filter(cie10_clasificacion == "Enfermedad meningocócica") %>%
   ungroup() %>%
-  complete(anio = 2005:2021) %>%
+  complete(anio = 2005:2022) %>%
   replace_na(list(cantidad = 0)) %>%
   group_by(anio) %>%
   summarise(cantidad = sum(cantidad)) %>%
@@ -87,7 +87,7 @@ mening <- datos2 %>%
 vari <- datos2 %>%
   filter(cie10_clasificacion == "Varicela") %>%
   ungroup() %>%
-  complete(anio = 2005:2021) %>%
+  complete(anio = 2005:2022) %>%
   replace_na(list(cantidad = 0)) %>%
   group_by(anio) %>%
   summarise(cantidad = sum(cantidad)) %>%
@@ -107,7 +107,7 @@ vari <- datos2 %>%
 covid <- datos2 %>%
   filter(cie10_causa_id == "U07") %>% #U07 is the code for COVID-19 
   ungroup() %>%
-  complete(anio = 2020:2021) %>%
+  complete(anio = 2020:2022) %>%
   replace_na(list(cantidad = 0)) %>%
   group_by(anio) %>%
   summarise(cantidad = sum(cantidad)) %>%
@@ -266,13 +266,13 @@ icd10groups<-icd10groups %>%
                                  TRUE ~ "Others"))
 
 #icd10groups %>% filter(anio_def=="2020" & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
-t2021<-icd10groups %>% filter(anio_def=="2021" & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
+t2022<-icd10groups %>% filter(anio_def=="2022" & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
 #Add rank column named "Rank 2021"
-t2021$Rank_2021<-rank(-t2021$Deaths); t2021 <- t2021[,c(3,1,2)]
+t2022$Rank_2022<-rank(-t2022$Deaths); t2022 <- t2022[,c(3,1,2)]
 #icd10groups %>% filter((anio_def=="2020" | anio_def=="2021") & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
 infecciosas_resp<-c("Influenza and pneumonia (J09-J18)","COVID-19 (U07)","Chronic lower respiratory diseases (J40-J47)","Infections with a predominantly sexual mode of transmission (A50-A64)","Tuberculosis (A15-A19)","Other bacterial diseases (A20-A49)","Other diseases of the respiratory system (J00-J06,J30-J39,J67,J70-J98)","Other acute lower respiratory infections (J20-J22)","Other and unspecified infectious and parasitic diseases and their sequelae (A00,A05,A20-A36,A42-A44,A48-A49,A54-A79,A81-A82,A85,A86-B04,B06-B09,B25-B49,B55-B99)")
-t2021infresp<-icd10groups %>% filter(ICD10_groups %in% infecciosas_resp & anio_def=="2021" & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
-t2021infresp$Rank_2021<-rank(-t2021infresp$Deaths); t2021infresp <- t2021infresp[,c(3,1,2)]
+t2022infresp<-icd10groups %>% filter(ICD10_groups %in% infecciosas_resp & anio_def=="2022" & ICD10_groups!="Others") %>% group_by(ICD10_groups) %>% summarize(Deaths=sum(cantidad)) %>% arrange(-Deaths)
+t2022infresp$Rank_2022<-rank(-t2022infresp$Deaths); t2022infresp <- t2022infresp[,c(3,1,2)]
 #write_csv(t2021,file="0_14_tabla_mortalidad_2021.csv")
 #write_csv(t2021infresp,file="0_14_tabla_mortalidad_2021_inf_resp.csv")
 
@@ -308,12 +308,12 @@ ggplot(data = data, aes(x = anio_def, y = rank, group = ICD10_groups)) +
   geom_point(color = "#FFFFFF", size = 1) +
   scale_y_continuous()+
   scale_y_reverse(limits=c(10,1),breaks = 1:show.top.n.ranks) +
-  scale_x_continuous(breaks = 2015:2021, minor_breaks = NULL, expand = c(.05, .05),limits=c(2012.5,2023.5)) +
+  scale_x_continuous(breaks = 2015:2022, minor_breaks = NULL, expand = c(.05, .05),limits=c(2012.5,2023.5)) +
   geom_label(family = "Times New Roman",data = data %>% filter(anio_def == 2015),
              aes(label = ICD10_groups, x = 2015-.15, y = rank, fill = ICD10_groups), 
              size= ggtext_size(8),color="white",hjust = 1, fontface = "bold", label.padding = unit(0.2, "lines"), label.size = 0.2) +
-  geom_label(family = "Times New Roman",data = data %>% filter(anio_def == 2021),
-             aes(label = ICD10_groups, x = 2021+.15, y = rank, fill = ICD10_groups), 
+  geom_label(family = "Times New Roman",data = data %>% filter(anio_def == 2022),
+             aes(label = ICD10_groups, x = 2022+.15, y = rank, fill = ICD10_groups), 
              size= ggtext_size(8),color="white",hjust = 0, fontface = "bold", label.padding = unit(0.2, "lines"), label.size = 0.2) +
     coord_cartesian(ylim = c(show.top.n.ranks,1)) + 
   theme(legend.position = "none") +
@@ -331,12 +331,12 @@ ggplot(data = data, aes(x = anio_def, y = rank, group = ICD10_groups_nocode)) +
   geom_point(color = "#FFFFFF", size = 1) +
   scale_y_continuous()+
   scale_y_reverse(limits=c(10,1),breaks = 1:show.top.n.ranks) +
-  scale_x_continuous(breaks = 2015:2021, minor_breaks = NULL, expand = c(.05, .05),limits=c(2012.5,2023.5)) +
+  scale_x_continuous(breaks = 2015:2022, minor_breaks = NULL, expand = c(.05, .05),limits=c(2012.5,2023.5)) +
   geom_label(family = "Times New Roman",data = data %>% filter(anio_def == 2015),
              aes(label = ICD10_groups_nocode, x = 2015-.15, y = rank, fill = ICD10_groups), 
              size= ggtext_size(8),color="white",hjust = 1, fontface = "bold", label.padding = unit(0.2, "lines"), label.size = 0.2) +
-  geom_label(family = "Times New Roman",data = data %>% filter(anio_def == 2021),
-             aes(label = ICD10_groups_nocode, x = 2021+.15, y = rank, fill = ICD10_groups), 
+  geom_label(family = "Times New Roman",data = data %>% filter(anio_def == 2022),
+             aes(label = ICD10_groups_nocode, x = 2022+.15, y = rank, fill = ICD10_groups), 
              size= ggtext_size(8),color="white",hjust = 0, fontface = "bold", label.padding = unit(0.2, "lines"), label.size = 0.2) +
     coord_cartesian(ylim = c(show.top.n.ranks,1)) + 
   theme(legend.position = "none") +

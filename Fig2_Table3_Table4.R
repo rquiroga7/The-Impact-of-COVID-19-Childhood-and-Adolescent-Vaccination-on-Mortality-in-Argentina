@@ -336,7 +336,7 @@ data4m$COMORBILIDAD<-case_when(data4m$COMORBILIDAD=="NOREPORTADO" ~ "None report
                               data4m$COMORBILIDAD=="SIN_COMORB" ~ "No comorbidities",
                               data4m$COMORBILIDAD=="RESPIRATORIA_CRONICA" ~ "Chronic respiratory disease",
                               data4m$COMORBILIDAD=="HEPATO_CRONICA" ~ "Chronic liver disease",
-                              data4m$COMORBILIDAD=="INMUNOS_CONGENITA" ~ "Congenital or acquired immunosupression",
+                              data4m$COMORBILIDAD=="INMUNOS_CONGENITA" ~ "Congenital or acquired immunosuppression",
                               data4m$COMORBILIDAD=="INSF_CARDIACA" ~ "Cardiac insufficiency",
                               data4m$COMORBILIDAD=="INSF_RENAL" ~ "Chronic renal insufficiency",
                               data4m$COMORBILIDAD=="TBC" ~ "Tuberculosis",
@@ -347,8 +347,8 @@ data4m$COMORBILIDAD<-case_when(data4m$COMORBILIDAD=="NOREPORTADO" ~ "None report
                               data4m$COMORBILIDAD=="BAJO_PESO" ~ "Low body weight",
                               data4m$COMORBILIDAD=="OBESIDAD" ~ "Obesity",
                               data4m$COMORBILIDAD=="DBT" ~ "Diabetes",
-                              data4m$COMORBILIDAD=="HTA" ~ "Arterial hipertension",
-                              data4m$COMORBILIDAD=="EPOC" ~ "Chronic Obstrucive Pulmonary Disease",
+                              data4m$COMORBILIDAD=="HTA" ~ "Arterial hypertension",
+                              data4m$COMORBILIDAD=="EPOC" ~ "Chronic Obstructive Pulmonary Disease",
                               data4m$COMORBILIDAD=="BRONQUIO_PREVIA" ~ "Previous bronchiolitis"
                               )
 #Make list of IDEVENTOCASO
