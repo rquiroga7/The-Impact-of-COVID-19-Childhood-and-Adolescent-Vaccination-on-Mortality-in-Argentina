@@ -7,7 +7,7 @@ devtools::install_github("thomasp85/scico")
 library(scico)
 
 
-datos<- read_csv("./Data/defunciones-ocurridas-y-registradas-en-la-republica-argentina-entre-los-anos-2005-2022.csv.gz", locale = locale(encoding = "ISO-8859-1"))
+datos<- read_csv("./Data/defunciones-ocurridas-y-registradas-en-la-republica-argentina-entre-los-anos-2005-2022.csv.gz")
 names(datos)[3]<-"jurisdiccion_residencia_nombre"
 #group datos by jurisdiccion_residencia_nombre, grupo_etario, anio, cie10_causa_id and sum cantidad 
 datos2 <- datos %>%
