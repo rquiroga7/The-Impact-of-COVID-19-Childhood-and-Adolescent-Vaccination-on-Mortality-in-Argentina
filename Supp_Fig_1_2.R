@@ -5,6 +5,8 @@ library(readr)
 library(sf)
 library(ggplot2)
 library(ggrepel)
+library(lubridate)
+library(grid)
 
 #Get population numbers
 poblacion <- read_csv("./Data/estructura_de_poblacion_identificada_residiendo_en_argentina.csv",
@@ -37,17 +39,21 @@ poblacion2$grupo_etario<-droplevels(poblacion2$grupo_etario)
 levels(poblacion2$grupo_etario)<-c("0-4","5-9","10-14","15-19")
 #Create a poblacion3 dataframe where cantidad is estimated for the 0-11 age group and the 12-17 age group
 poblacion3 <- poblacion2 %>%
-  filter(grupo_etario=="0-4" | grupo_etario=="5-9" | grupo_etario=="10-14") %>%
+  filter(grupo_etario == "0-4" | grupo_etario == "5-9" | grupo_etario == "10-14") %>%
   group_by(jurisdiccion_residencia) %>%
-  summarise(poblacion = sum(ifelse(grupo_etario=="10-14",poblacion/5*2,poblacion))) %>%
-  mutate(grupo_etario = "<12") 
+  summarise(poblacion = sum(ifelse(grupo_etario=="10-14",poblacion/5*2,ifelse(grupo_etario=="0-4",poblacion/5*2,poblacion)))) %>%
+  mutate(grupo_etario = "3-11") 
 poblacion4 <- poblacion2 %>%
     filter(grupo_etario=="10-14" | grupo_etario=="15-19" ) %>%
     group_by(jurisdiccion_residencia) %>%
     summarise(poblacion = sum(poblacion/5*3)) %>%
     mutate(grupo_etario = "12-17")
-
-poblacion5<-bind_rows(poblacion3,poblacion4)
+poblacion4b <- poblacion2 %>%
+  filter(grupo_etario == "0-4") %>%
+  group_by(jurisdiccion_residencia) %>%
+  summarise(poblacion = sum(ifelse(grupo_etario=="0-4",poblacion/5*3))) %>%
+  mutate(grupo_etario = "0-2") 
+poblacion5<-bind_rows(poblacion3,poblacion4,poblacion4b)
 poblacion6<-poblacion5 %>% group_by(grupo_etario) %>% summarise(poblacion=sum(poblacion))
 
 # If grouped_df.gz does not exist:
@@ -86,19 +92,32 @@ if (!file.exists("./Data/grouped_df2.gz")) {
   write_csv(grouped_df, "./Data/grouped_df2.gz")
 }
 
-grouped_df<-read_csv("./Data/grouped_df2.gz")
+#grouped_df<-read_csv("./Data/grouped_df2.gz")
+grouped_df<-read_csv("./Data/vacnew.zip")
+grouped_df <- grouped_df %>% ungroup() %>% filter(EDAD_ANIOS %in% c("0-2", "3-4", "5-11", "12-17"))
+names(grouped_df)[1]<-"jurisdiccion_residencia"
+names(grouped_df)[6]<-"EDAD"
+names(grouped_df)[8]<-"nombre_dosis_generica"
+grouped_df <- grouped_df %>%
+mutate(MES = recode(MES,   Enero = 01,   Febrero = 02,   Marzo = 03,   Abril = 04,   Mayo = 05,   Junio = 06,    Julio = 07,   Agosto = 08,   Septiembre = 09,   Octubre = 10,   Noviembre = 11,  Diciembre = 12 ))
+#Create date column from ANIO and MES
+grouped_df$fecha_aplicacion<- ymd(paste0(grouped_df$ANIO,"-",grouped_df$MES,"-01"))
+#Change age group to 0-2, 3-11, 12-17
+grouped_df<-grouped_df %>% mutate(grupo_etario = case_when(EDAD == "0-2" ~ "0-2",
+                                           EDAD == "3-4" | EDAD == "5-11" ~ "3-11",
+                                           EDAD == "12-17" ~ "12-17")) 
+grouped_df$grupo_etario<-as.factor(grouped_df$grupo_etario)
+grouped_df$nombre_dosis_generica<-as.factor(grouped_df$nombre_dosis_generica)
+grouped_df$jurisdiccion_residencia<-as.factor(grouped_df$jurisdiccion_residencia)
+grouped_df <- grouped_df %>% group_by(jurisdiccion_residencia,grupo_etario,nombre_dosis_generica,fecha_aplicacion) %>% summarise(count = sum(CANTIDAD, na.rm = TRUE))
+levels(grouped_df$nombre_dosis_generica)<-c("1ra","2da","3ra o más")
 
 
 # Create a new dataframe that contains all possible combinations of jurisdiccion_residencia, grupo_etario, nombre_dosis_generica, and dates within the range of the fecha_aplicacion column in datos
-date_range <- grouped_df %>%
-  select(fecha_aplicacion) %>%
-  summarize(start_date = min(fecha_aplicacion), end_date = max(fecha_aplicacion))
-
 jurisdiccion_residencia <- unique(grouped_df$jurisdiccion_residencia)
 grupo_etario <- unique(grouped_df$grupo_etario)
 nombre_dosis_generica <- unique(grouped_df$nombre_dosis_generica)
-
-date_df <- expand.grid(jurisdiccion_residencia, grupo_etario, nombre_dosis_generica, fecha_aplicacion = seq(date_range$start_date, date_range$end_date, by = "day"))
+date_df <- expand.grid(jurisdiccion_residencia, grupo_etario, nombre_dosis_generica, fecha_aplicacion = seq(as.Date("2020-01-01"), as.Date("2022-12-01"), by = "month"))
 
 # Rename columns in date_df to match grouped_df
 colnames(date_df) <- c("jurisdiccion_residencia", "grupo_etario", "nombre_dosis_generica", "fecha_aplicacion")
@@ -123,18 +142,22 @@ levels(poblacion5$jurisdiccion_residencia)<-c("Buenos Aires", "Catamarca","Chaco
 final_df2 <- final_df %>%
   left_join(poblacion5, by = c("jurisdiccion_residencia", "grupo_etario")) %>%
   mutate(cumulative_count_perc = cumulative_count / poblacion * 100)
+#Change NA to 0 for poblacion and cumulative_count_perc
+
 
 
 #Change factor levels of nombre_dosis_generica
 final_df2b<-final_df2
 final_df2b$nombre_dosis_generica <- as.factor(final_df2b$nombre_dosis_generica)
 levels(final_df2b$nombre_dosis_generica)<- c("1 dose", "2 doses", "3 doses or more")
+#Limit upper end of vaccinated to 100. Since we consider static population numbers, the total number of vaccinated per age group can exceed population
+final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(cumulative_count_perc>100,100,cumulative_count_perc))
 # Create the plots
-plot <- ggplot(final_df2b %>% filter(grupo_etario=="<12"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
+plot <- ggplot(final_df2b %>% filter(grupo_etario=="0-2"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
   geom_line() +
   facet_wrap(~jurisdiccion_residencia, ncol = 4) +
   labs(x = "Date", y = "Cumulative % of population", color = "Doses recieved") +
-  ggtitle("Pediatric Vaccination coverage by province for 0-11 year old age group") +
+  ggtitle("Pediatric Vaccination coverage by province for 0-2 year old age group") +
   #scale_y limits the y axis to 0-100
   scale_y_continuous(limits = c(0, 100)) +
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
@@ -144,6 +167,21 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="<12"), aes(x = fecha_aplicac
 plot
 #save plot to file
 ggsave("Supp_Fig1A.png", plot, width = 12, height = 8, units = "in", dpi = 300)
+
+plot <- ggplot(final_df2b %>% filter(grupo_etario=="3-11"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
+  geom_line() +
+  facet_wrap(~jurisdiccion_residencia, ncol = 4) +
+  labs(x = "Date", y = "Cumulative % of population", color = "Doses recieved") +
+  ggtitle("Pediatric Vaccination coverage by province for 3-11 year old age group") +
+  #scale_y limits the y axis to 0-100
+  scale_y_continuous(limits = c(0, 100)) +
+  #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
+  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
+  theme_bw() +
+  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))
+plot
+#save plot to file
+ggsave("Supp_Fig1B.png", plot, width = 12, height = 8, units = "in", dpi = 300)
 
 plot <- ggplot(final_df2 %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
   geom_line() +
@@ -157,7 +195,7 @@ plot <- ggplot(final_df2 %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplica
   theme_bw() +
   theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))
 plot
-ggsave("Supp_Fig1B.png", plot, width = 12, height = 8, units = "in", dpi = 300)
+ggsave("Supp_Fig1C.png", plot, width = 12, height = 8, units = "in", dpi = 300)
 
 
 
@@ -174,22 +212,22 @@ ggsave("Supp_Fig1B.png", plot, width = 12, height = 8, units = "in", dpi = 300)
 
 
 
-#For each jurisdiccion_residencia, grupo_etario, and nombre_dosis_generica, find cumulative_count_perc for date "2023-01-01"
+#For each jurisdiccion_residencia, grupo_etario, and nombre_dosis_generica, find cumulative_count_perc for date "2022-12-01"
 final_df4 <- final_df2 %>%
   group_by(jurisdiccion_residencia, grupo_etario, nombre_dosis_generica) %>%
-  filter(fecha_aplicacion == as.Date("2023-01-01")) %>%
+  filter(fecha_aplicacion == as.Date("2022-12-01")) %>%
   ungroup()
 
 
 
 #STATIC MAP
 
-create_map <- function(argentina_data,titulo="") {
+create_map <- function(argentina_data,titulo="",mins=20,maxs=90) {
   # Merge data frame with shapefile
   # Create choropleth map
   ss <- ggplot() +
     geom_sf(data = argentina_data, aes(fill = cumulative_count_perc)) +
-    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(20, 90)) +
+    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(mins, maxs)) +
     scale_x_continuous(expand = c(0, 0)) +
     scale_y_continuous(expand = c(0, 0)) +
     labs(x = "longitude", y = "latitude") +
@@ -229,7 +267,8 @@ create_map <- function(argentina_data,titulo="") {
 unzip("./Data/provincias.zip")
 argentina <- st_read("./provincias.shp")
 # Load data frame with values to map
-data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="<12" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01')) 
+data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="0-2" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01')) 
+mins=0;maxs=20
 levels(data$jurisdiccion_residencia)[2] <- "Ciudad Autónoma de Buenos Aires"
 levels(data$jurisdiccion_residencia)[23] <- "Tierra del Fuego, Antártida e Islas del Atlántico Sur"
 argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_residencia"))
@@ -238,25 +277,56 @@ argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_res
   inset <- argentina_data %>% filter(NAM == "Ciudad Autónoma de Buenos Aires") %>%
     ggplot() + 
     geom_sf(aes(fill = cumulative_count_perc)) +
-    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(20, 90)) +
+    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(mins, maxs)) +
     labs(x = NULL, y = NULL) +
     theme_test() +
     theme(text = element_text(family = "Times New Roman"), legend.position = "none", axis.ticks = element_blank(), axis.text = element_blank()) +
     coord_sf(expand = FALSE)
 # Create map for under 12 year olds
-ss<-create_map(argentina_data,titulo="0-11 year olds vaccinated with at least 2 doses as of 2023-01-01")
+ss<-create_map(argentina_data,titulo="0-2 year olds vaccinated with at least 2 doses as of December 2022",mins=mins,maxs=maxs)
 vp <- viewport()
 sbvp <- viewport(0.57, 0.408, width = 0.15, height = 0.15)
 pdf("Supp_Fig_2A.pdf", width = 15, height = 10); print(ss) ; print(inset, vp=sbvp); dev.off()
+
+#Create map for 3-11 year olds
+data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="3-11" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01')) 
+mins=0;maxs=90
+levels(data$jurisdiccion_residencia)[2] <- "Ciudad Autónoma de Buenos Aires"
+levels(data$jurisdiccion_residencia)[23] <- "Tierra del Fuego, Antártida e Islas del Atlántico Sur"
+argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_residencia"))
+  
+  # Create inset map for Ciudad de Buenos Aires
+  inset <- argentina_data %>% filter(NAM == "Ciudad Autónoma de Buenos Aires") %>%
+    ggplot() + 
+    geom_sf(aes(fill = cumulative_count_perc)) +
+    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(mins, maxs)) +
+    labs(x = NULL, y = NULL) +
+    theme_test() +
+    theme(text = element_text(family = "Times New Roman"), legend.position = "none", axis.ticks = element_blank(), axis.text = element_blank()) +
+    coord_sf(expand = FALSE)
+# Create map for under 12 year olds
+ss<-create_map(argentina_data,titulo="3-11 year olds vaccinated with at least 2 doses as of December 2022",mins=mins,maxs=maxs)
+vp <- viewport()
+sbvp <- viewport(0.57, 0.408, width = 0.15, height = 0.15)
+pdf("Supp_Fig_2B.pdf", width = 15, height = 10); print(ss) ; print(inset, vp=sbvp); dev.off()
 
 #Create map for 12-17 year olds
 data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="12-17" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01'))
 levels(data$jurisdiccion_residencia)[2] <- "Ciudad Autónoma de Buenos Aires"
 levels(data$jurisdiccion_residencia)[23] <- "Tierra del Fuego, Antártida e Islas del Atlántico Sur"
 argentina_data <- argentina %>% left_join(data, by = c("NAM" = "jurisdiccion_residencia"))
-ss2<-create_map(argentina_data,titulo="12-17 year olds vaccinated with at least 2 doses as of 2023-01-01")
+  # Create inset map for Ciudad de Buenos Aires
+  inset <- argentina_data %>% filter(NAM == "Ciudad Autónoma de Buenos Aires") %>%
+    ggplot() + 
+    geom_sf(aes(fill = cumulative_count_perc)) +
+    scale_fill_gradientn(colours = hcl.colors(9, "RdBu", alpha = 0.9), limits = c(mins, maxs)) +
+    labs(x = NULL, y = NULL) +
+    theme_test() +
+    theme(text = element_text(family = "Times New Roman"), legend.position = "none", axis.ticks = element_blank(), axis.text = element_blank()) +
+    coord_sf(expand = FALSE)
+ss2<-create_map(argentina_data,titulo="12-17 year olds vaccinated with at least 2 doses as of December 2022",mins=mins,maxs=maxs)
 vp <- viewport()
 sbvp <- viewport(0.57, 0.408, width = 0.15, height = 0.15)
-pdf("Supp_Fig_2B.pdf", width = 15, height = 10); print(ss2) ; print(inset, vp=sbvp); dev.off()
+pdf("Supp_Fig_2C.pdf", width = 15, height = 10); print(ss2) ; print(inset, vp=sbvp); dev.off()
 
 
