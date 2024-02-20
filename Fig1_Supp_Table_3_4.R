@@ -39,6 +39,7 @@ datad<-datad %>% mutate(grupo_etario=case_when(EDAD_APERTURA<3 ~ "0-2",EDAD_APER
 monthly_deaths <- datad %>% 
 #filter only with deaths
   filter(!is.na(FECHA_FALLECIMIENTO)) %>%
+  filter(FECHA_FALLECIMIENTO<="2022-12-31") %>%
   ungroup() %>% 
   group_by(grupo_etario) %>%
   mutate(Periodos = format(as.Date(FECHA_FALLECIMIENTO), "%Y-%m")) %>% 
@@ -46,24 +47,28 @@ monthly_deaths <- datad %>%
   group_by(grupo_etario,Periodos) %>% 
   #mutate FECHA_FALLECIMIENTO to the first day of the month
   count() %>%
-  mutate(fecha=as.Date(paste0(Periodos,"-01"))) 
-  monthly_cases <- datad %>% 
+  mutate(fecha=as.Date(paste0(Periodos,"-01")))  
+
+monthly_cases <- datad %>% 
   ungroup() %>% 
+  filter(FECHA_APERTURA<="2022-12-31") %>%
   group_by(grupo_etario) %>%
   mutate(Periodos = format(as.Date(FECHA_APERTURA), "%Y-%m")) %>% 
   distinct(IDEVENTOCASO, .keep_all = TRUE) %>% 
   group_by(grupo_etario,Periodos) %>% 
   count() %>%
-  mutate(fecha=as.Date(paste0(Periodos,"-01"))) 
+  mutate(fecha=as.Date(paste0(Periodos,"-01")))  
 
 
 library(xlsx)
 
 #Write xlsx file with monthly cases and deaths
-names(monthly_cases)<-c("Age group","Year-Month","Cases","Date")
-write.xlsx(monthly_cases[,1:3],"Supp_Table_3_monthly_cases.xlsx")
-names(monthly_deaths)<-c("Age group","Year-Month","Deaths","Date")
-write.xlsx(monthly_deaths[,1:3],"Supp_Table_4_monthly_deaths.xlsx")
+monthly_cases_table<-monthly_cases[,1:3] %>% ungroup()
+names(monthly_cases_table)<-c("Age group","Year-Month","Cases","Date")
+write.xlsx(monthly_cases_table,"Supp_Table_3_monthly_cases.xlsx")
+monthly_deaths_table<-monthly_deaths[,1:3] %>% ungroup()
+names(monthly_deaths_table)<-c("Age group","Year-Month","Deaths","Date")
+write.xlsx(monthly_deaths_table,"Supp_Table_4_monthly_deaths.xlsx")
 
 #defino la paleta de colores para el grafico
 #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") #toda la gama
@@ -72,7 +77,7 @@ cbPalette <- c("#56B4E9", "#009E73", "#D55E00")
 
 
 #grafico barras apilado
-deaths<-monthly_deaths %>% 
+deaths<-monthly_deaths %>%
   ggplot() +
   geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("12-17","3-11","0-2")))) +
   geom_text(family="Times New Roman",aes(fecha, label_y, label = label_y), vjust = -1,
@@ -87,7 +92,7 @@ deaths<-monthly_deaths %>%
   labs(x= "", y="Monthly deaths", fill="Age groups", tags="B")
 
 
-cases<-monthly_cases %>% 
+cases<-monthly_cases %>%
   ggplot() +
   geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("12-17","3-11","0-2")))) +
   geom_text(family="Times New Roman",aes(fecha, label_y, label = label_y), vjust = 0.5, hjust=0, angle=90,
