@@ -334,7 +334,7 @@ data4m$COMORBILIDAD<-case_when(data4m$COMORBILIDAD=="NOREPORTADO" ~ "None report
                               data4m$COMORBILIDAD=="BRONQUIO_PREVIA" ~ "Previous bronchiolitis"
                               )
 #Make list of IDEVENTOCASO
-idfall2<-data2 %>% filter(FECHA_FALLECIMIENTO > as.Date("2020-01-01")) %>% dplyr::pull(IDEVENTOCASO)
+idfall2<-data2 %>% filter(FECHA_FALLECIMIENTO > as.Date("2020-01-01") & FECHA_FALLECIMIENTO <= as.Date("2022-12-31")) %>% dplyr::pull(IDEVENTOCASO)
 data2m<-data2 %>% filter(IDEVENTOCASO %in% idfall2) %>% dplyr::select(IDEVENTOCASO,COMORBILIDAD)
 data2m$COMORBILIDAD[is.na(data2m$COMORBILIDAD)]<-"NOREPORTADO"
 #If multiple rows have the same IDEVENTOCASO, but different COMORBILIDAD values, then COMORBILIDAD = "MULTIPLE"
