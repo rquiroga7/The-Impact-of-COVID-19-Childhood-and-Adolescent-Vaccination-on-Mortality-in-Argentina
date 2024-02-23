@@ -144,9 +144,9 @@ vacunas_wide2$'Annual post-vaccine deaths'[5]<- "-"
 View(vacunas_wide2)
 #Write table to csv
 #write_csv(vacunas_wide2,file="0_14_tabla_mortalidad_vacunas.csv")
-#write_csv(vacunas_wide2,file="Table2.csv")
+#write_csv(vacunas_wide2,file="Table4.csv")
 library(openxlsx)
-write.xlsx(vacunas_wide2,file="Table2.xlsx")
+write.xlsx(as.data.frame(vacunas_wide2),file="Table4.xlsx")
 
 
 
@@ -391,12 +391,13 @@ table_yearly_inf <- yearly_inf %>%
   summarize(Deaths = sum(Deaths)) %>%
   mutate(Deaths = ifelse(is.na(Deaths), 0, Deaths)) %>%
   arrange(anio_def, ICD10_groups) %>%
-  pivot_wider(names_from = anio_def, values_from = Deaths,values_fill = 0)
+  pivot_wider(names_from = anio_def, values_from = Deaths,values_fill = 0) %>%
+  ungroup()
 
 #Write excel file
-library(xlsx)
+library(openxlsx)
 #write_excel(table_yearly_inf,file="Supp_Table_1.xlsx")
-write.xlsx(table_yearly_inf, file = "Supp_Table_1.xlsx", sheetName = "Sheet1", append = TRUE, rowNames = FALSE)
+write.xlsx(as.data.frame(table_yearly_inf), file = "Supp_Table_1.xlsx",row.names=F)
 
 
 #Generate table of deaths by group
@@ -409,4 +410,4 @@ table_yearly_all <- yearly_all %>%
 
   
 #write_excel_csv(table_yearly_all,file="Supp_Table_2.xlsx")
-write.xlsx(table_yearly_all, file = "Supp_Table_2.xlsx", sheetName = "Sheet1", append = TRUE, rowNames = FALSE)
+write.xlsx(as.data.frame(table_yearly_all), file = "Supp_Table_2.xlsx", sheetName = "Sheet1", append = TRUE, row.names = FALSE)

@@ -273,7 +273,7 @@ table1<-table1[c(1,3,2),]
 library(openxlsx)
 write.xlsx(table1,"Table1.xlsx")
 
-#Write Table 3 of vaccinated and non vaccinated Deaths per year and age group
+#Write table 2 of vaccinated and non vaccinated Deaths per year and age group
 death_data8 <- death_data7 %>%
 filter(fecha_fallecimiento<="2022-12-31") %>%
   mutate(year = year(fecha_fallecimiento)) %>%
@@ -292,10 +292,10 @@ colnames(death_data8b)<-c("Year",rep(c("Non Vaccinated Deaths","Vaccinated Death
 kable_out <- kable(death_data8b, caption = "Deaths by year, age group, vaccination status") %>%
   add_header_above(c(" " = 1, "0-2 years old" = 2, "3-11 years old" = 2, "12-17 years old" = 2)) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
-readr::write_file(kable_out, "Table3.html")
+readr::write_file(kable_out, "Table2.html")
 
 
-###Create table 4, comorbilities
+###Create table 3, comorbilities
 idfall1<-data1 %>% filter(FECHA_FALLECIMIENTO > as.Date("2020-01-01")) %>% dplyr::pull(IDEVENTOCASO)
 data4<-data1 %>% 
 filter(IDEVENTOCASO %in% idfall1) %>%
@@ -369,5 +369,5 @@ counts2 <- datam %>%
 names(counts2)<-c("Comorbidity","Count")
 
 library(openxlsx)
-#write_csv(counts2,"Table4.csv")
-write.xlsx(counts2,"Table4.xlsx")
+#write_csv(counts2,"Table3.csv")
+write.xlsx(counts2,"Table3.xlsx")
