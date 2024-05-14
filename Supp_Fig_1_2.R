@@ -183,7 +183,7 @@ plot
 #save plot to file
 ggsave("Supp_Fig1B.png", plot, width = 12, height = 8, units = "in", dpi = 300)
 
-plot <- ggplot(final_df2 %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
+plot <- ggplot(final_df2b %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
   geom_line() +
   facet_wrap(~jurisdiccion_residencia, ncol = 4) +
   labs(x = "Date", y = "Cumulative % of population", color = "Doses recieved") +

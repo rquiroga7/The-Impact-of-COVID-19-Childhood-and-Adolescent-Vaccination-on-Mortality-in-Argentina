@@ -213,7 +213,7 @@ mort_vac_plot<-ggplot(death_data7c %>% filter(vac == "0 dose" | vac == "1 dose" 
   labs(tag="B")+
   scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
   #Save png
-#mort_vac_plot
+mort_vac_plot
 #ggsave("cum_incidence_by_vac_status_0_1_2.png", width = 154, height = 77, units = "mm", dpi = 300)
 
 #Join with poblacion7
@@ -256,14 +256,14 @@ fig2<-plot_grid(plot_vac,mort_vac_plot, ncol=1, align="v")
 ggsave("Fig2.png", width = 154, height = 75, units = "mm", dpi = 300, scale = 2)
 ggsave("Fig2.svg", width = 154, height = 75, units = "mm", dpi = 300, scale = 2)
 
-#Write Table 1
+#Write Table 1 ###DOES NOT WORKKK!#####CHECK!
 #Select columns output xlsx table
-merged_data<-final_df2 %>% filter(fecha_aplicacion == as.Date("2022-12-01"))
+merged_data<-final_df2b %>% filter(fecha_aplicacion == as.Date("2022-12-01"))
 #pivot long to wide
-merged_data<-merged_data %>% pivot_wider(names_from = nombre_dosis_generica, values_from = pct_vac)
+merged_data<-merged_data %>% pivot_wider(names_from = nombre_dosis_generica, values_from = cumulative_count_perc)
 names(merged_data)[1]<-"Age Group (years)"
 #Select columns output xslx table
-table1<-merged_data %>% select('Age Group (years)',`1 dose`,`2 doses`,`3+ doses`)
+table1<-merged_data %>% select('Age Group (years)',`1 dose`,`2 doses`,`3 doses or more`)
 #Round the values to percentages, add percentage sign 
 table1[2:4]<-round(table1[2:4],0)
 table1[2:4] <- lapply(table1[2:4], function(x) paste0(x, "%"))
@@ -292,6 +292,9 @@ colnames(death_data8b)<-c("Year",rep(c("Non Vaccinated Deaths","Vaccinated Death
 kable_out <- kable(death_data8b, caption = "Deaths by year, age group, vaccination status") %>%
   add_header_above(c(" " = 1, "0-2 years old" = 2, "3-11 years old" = 2, "12-17 years old" = 2)) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
+#Add an asterisk to all zeroes in the table, but not if they have another character after or before them 
+kable_out <- gsub(" 0(?![0-9])", " 0* ", kable_out, perl = TRUE)
+
 readr::write_file(kable_out, "Table2.html")
 
 
