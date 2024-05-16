@@ -149,7 +149,7 @@ final_df2 <- final_df %>%
 #Change factor levels of nombre_dosis_generica
 final_df2b<-final_df2
 final_df2b$nombre_dosis_generica <- as.factor(final_df2b$nombre_dosis_generica)
-levels(final_df2b$nombre_dosis_generica)<- c("1 dose", "2 doses", "3 doses or more")
+levels(final_df2b$nombre_dosis_generica)<- c("1 dose", "2 doses", "3+ doses")
 #Limit upper end of vaccinated to 100. Since we consider static population numbers, the total number of vaccinated per age group can exceed population
 final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(cumulative_count_perc>100,100,cumulative_count_perc))
 # Create the plots
@@ -163,7 +163,8 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="0-2"), aes(x = fecha_aplicac
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
-  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))
+  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
+  scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
 plot
 #save plot to file
 ggsave("Supp_Fig1A.png", plot, width = 12, height = 8, units = "in", dpi = 300)
@@ -178,7 +179,8 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="3-11"), aes(x = fecha_aplica
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
-  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))
+  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
+  scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
 plot
 #save plot to file
 ggsave("Supp_Fig1B.png", plot, width = 12, height = 8, units = "in", dpi = 300)
@@ -193,7 +195,8 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplic
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
-  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))
+  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
+  scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
 plot
 ggsave("Supp_Fig1C.png", plot, width = 12, height = 8, units = "in", dpi = 300)
 

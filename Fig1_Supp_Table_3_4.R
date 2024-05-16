@@ -47,7 +47,17 @@ monthly_deaths <- datad %>%
   group_by(grupo_etario,Periodos) %>% 
   #mutate FECHA_FALLECIMIENTO to the first day of the month
   count() %>%
-  mutate(fecha=as.Date(paste0(Periodos,"-01")))  
+  mutate(fecha=as.Date(paste0(Periodos,"-01")))  %>%
+  ungroup() %>%
+  #create all possible combinations of grupo_etario and fecha (first day of each month for 2020,2021 and 2022), using n=0
+  complete(grupo_etario,fecha=seq.Date(as.Date("2020-03-01"),as.Date("2022-12-01"),by="month"),fill=list(n=0)) %>%
+  #remove the Periodos column
+  select(-Periodos)
+
+yearly_deaths<-monthly_deaths %>% 
+  mutate(anio=format(fecha,"%Y")) %>%
+  group_by(grupo_etario,anio) %>%
+  summarise(n=sum(n))  
 
 monthly_cases <- datad %>% 
   ungroup() %>% 

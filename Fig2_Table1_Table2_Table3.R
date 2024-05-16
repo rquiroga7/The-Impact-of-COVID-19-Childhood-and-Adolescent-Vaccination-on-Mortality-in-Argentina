@@ -4,6 +4,9 @@ library(tidyr)
 library(readr)
 library(ggplot2)
 library(cowplot)
+library(lubridate)
+library(cowplot)
+library(openxlsx)
 
 data1 <- read_excel("./Data/fall_1.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "text", rep("text", 31)))
 data1$FECHA_FALLECIMIENTO<-as.Date(data1$FECHA_FALLECIMIENTO,format="%d/%m/%Y")
@@ -16,6 +19,10 @@ names(data2b)<-names(data1b)
 
 
 data<-rbind(data1b,data2b)
+#Write xslx file using openxlsx
+write.xlsx(data,"data.xlsx")
+
+
 data$vac<-as.factor(data$vac)
 #leave only rows with unique IDEVENTOCASO
 data <- data %>% distinct(IDEVENTOCASO, .keep_all = TRUE) %>% 
@@ -205,7 +212,7 @@ mort_vac_plot<-ggplot(death_data7c %>% filter(vac == "0 dose" | vac == "1 dose" 
   #ggtitle("Cumulative deaths in 2022 by age group and vaccination status") +
   #facet for each grupo_etario
   facet_wrap(~grupo_etario) +
-  scale_y_continuous(limits = c(0, 4),breaks = seq(0, 4, 0.5)) +
+  scale_y_continuous(limits = c(0, 4),breaks = seq(0, 4, 0.5),expand=c(0,0.25)) +
   scale_x_date(date_labels = "%b-%Y",date_breaks = "1 month",limits = c(as.Date("2022-01-01"), as.Date("2022-12-01"))) +
   theme_light(base_size=10)+
   #legend at bottom, rotate x axis marks 90 degrees
@@ -231,6 +238,14 @@ final_df2<-final_df2 %>% pivot_longer(cols = c(pct_1, pct_2, pct_3), names_to = 
 #Change factor level names to "1","2","3 or more"
 final_df2$nombre_dosis_generica<-as.factor(final_df2$nombre_dosis_generica)
 levels(final_df2$nombre_dosis_generica)<-c("1 dose","2 doses","3+ doses")
+#Duplicate rows with nombre_dosis_generica=="1 dose" , changing nombre_dosis_generica to "0 dose"
+nodose<-final_df2 %>% filter(nombre_dosis_generica=="1 dose") %>% mutate(nombre_dosis_generica="0 dose")
+final_df2<-rbind(final_df2,nodose) %>% arrange(fecha_aplicacion,grupo_etario)
+#change the pct_vac value for nombre_dosis_generica== "0 dose" to 100-pct_vac
+final_df2<-final_df2 %>% mutate(pct_vac=ifelse(nombre_dosis_generica=="0 dose",100-pct_vac,pct_vac))
+#Rearrange nombre_dosis_generica levels to "0 dose","1 dose","2 doses","3+ doses"
+final_df2$nombre_dosis_generica<-factor(final_df2$nombre_dosis_generica,levels=c("0 dose","1 dose","2 doses","3+ doses"))
+
 
 # Create the plot
 plot_vac <- ggplot(final_df2, aes(x = fecha_aplicacion, y = pct_vac, color = nombre_dosis_generica)) +
@@ -240,30 +255,30 @@ plot_vac <- ggplot(final_df2, aes(x = fecha_aplicacion, y = pct_vac, color = nom
   #limit x axis to 2023-01-01
   scale_x_date(date_labels = "%b-%Y",date_breaks = "1 month",limits = c(as.Date("2022-01-01"), as.Date("2022-12-01"))) +
   #set y scale breaks to 10
-  scale_y_continuous(limits = c(0, 100),breaks = seq(0, 100, 20)) +
-  labs(x = "Date", y = "Population vaccinated (%)", color = "COVID-19 Vaccine doses recieved") +
+  scale_y_continuous(limits = c(0, 100),breaks = seq(0, 100, 20),expand=c(0,5)) +
+  labs(x = "Date", y = 'Population vaccinated (%)', color = 'COVID-19 Vaccine doses recieved') +
   #ggtitle("Pediatric COVID-19 vaccination coverage for each age group") +
   theme_light(base_size=10)+
   #legend at bottom, rotate x axis marks 90 degrees
   theme(text = element_text(family = "Times New Roman"),strip.background = element_rect(fill="gray90",color="black",size=1),strip.text = element_text(face="bold", color="black"),plot.title = element_text(hjust = 0.5),legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   labs(tag="A")+
   scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
-#plot_vac
+plot_vac
 #ggsave("vaccination_plot.png", width = 154, height = 77, units = "mm", dpi = 300)
 
 fig2<-plot_grid(plot_vac,mort_vac_plot, ncol=1, align="v")
-
+fig2
 ggsave("Fig2.png", width = 154, height = 75, units = "mm", dpi = 300, scale = 2)
 ggsave("Fig2.svg", width = 154, height = 75, units = "mm", dpi = 300, scale = 2)
 
-#Write Table 1 ###DOES NOT WORKKK!#####CHECK!
+#Write Table 1 of vaccination coverage by age group at end of 2022
 #Select columns output xlsx table
-merged_data<-final_df2b %>% filter(fecha_aplicacion == as.Date("2022-12-01"))
+merged_data<-final_df2 %>% filter(fecha_aplicacion == as.Date("2022-12-01"))
 #pivot long to wide
-merged_data<-merged_data %>% pivot_wider(names_from = nombre_dosis_generica, values_from = cumulative_count_perc)
+merged_data<-merged_data %>% pivot_wider(names_from = nombre_dosis_generica, values_from = pct_vac)
 names(merged_data)[1]<-"Age Group (years)"
 #Select columns output xslx table
-table1<-merged_data %>% select('Age Group (years)',`1 dose`,`2 doses`,`3 doses or more`)
+table1<-merged_data %>% select('Age Group (years)',`1 dose`,`2 doses`,`3+ doses`)
 #Round the values to percentages, add percentage sign 
 table1[2:4]<-round(table1[2:4],0)
 table1[2:4] <- lapply(table1[2:4], function(x) paste0(x, "%"))
