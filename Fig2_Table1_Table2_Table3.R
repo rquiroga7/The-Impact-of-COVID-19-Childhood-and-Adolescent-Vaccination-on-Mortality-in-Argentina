@@ -17,11 +17,7 @@ data1b<-data1[,c(1,3,7,11,43)]
 data2b<-data2[,c(1,3,7,11,27)]
 names(data2b)<-names(data1b)
 
-
 data<-rbind(data1b,data2b)
-#Write xslx file using openxlsx
-write.xlsx(data,"data.xlsx")
-
 
 data$vac<-as.factor(data$vac)
 #leave only rows with unique IDEVENTOCASO

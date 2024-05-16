@@ -9,6 +9,7 @@ library(highcharter)
 library(cowplot)
 library(dunnr)
 library(readr)
+library(xlsx)
 
 #CARGO BASE
 
@@ -24,6 +25,12 @@ if(!file.exists("./Data/data.gz")){
     write_csv(data,"./Data/data.gz",col_names = TRUE)
 }
 data<-read_csv("./Data/data.gz")
+
+#CORRECT TWO CASES WITH WRONG DEATH DATE, where death date was prior to vaccination date
+#IDEVENTOCASO =  3616406, change FECHA_FALLECIMIENTO from 2020-10-19 to 2022-10-19
+data$FECHA_FALLECIMIENTO[data$IDEVENTOCASO==3616406]<-as.Date("2022-10-19")
+#IDEVENTOCASO =  16177350, change FECHA_FALLECIMIENTO from 2021-07-23 to 2022-07-23
+data$FECHA_FALLECIMIENTO[data$IDEVENTOCASO==16177350]<-as.Date("2022-07-23")
 
 #for each unique value of IDEVENTOCASO, get the row with a date in the column FECHA_FALLECIMIENTO, else get first row, do not break date format
 datad <- data %>%
@@ -70,7 +77,7 @@ monthly_cases <- datad %>%
   mutate(fecha=as.Date(paste0(Periodos,"-01")))  
 
 
-library(xlsx)
+
 
 #Write xlsx file with monthly cases and deaths
 monthly_cases_table<-monthly_cases[,1:3] %>% ungroup()
