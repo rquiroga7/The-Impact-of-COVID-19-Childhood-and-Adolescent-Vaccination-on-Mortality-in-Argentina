@@ -42,29 +42,29 @@ datad <- data %>%
 #create grupo_etario column using case_when function
 datad<-datad %>% mutate(grupo_etario=case_when(EDAD_APERTURA<3 ~ "0-2",EDAD_APERTURA>=3 & EDAD_APERTURA<12 ~ "3-11",EDAD_APERTURA>=12 & EDAD_APERTURA<18 ~ "12-17"))
 
-#Count number of rows in datad by month, save to monthly_cases dataframe
+ #Count number of rows in datad by month, save to monthly_cases dataframe
 monthly_deaths <- datad %>% 
-#filter only with deaths
-  filter(!is.na(FECHA_FALLECIMIENTO)) %>%
-  filter(FECHA_FALLECIMIENTO<="2022-12-31") %>%
-  ungroup() %>% 
-  group_by(grupo_etario) %>%
-  mutate(Periodos = format(as.Date(FECHA_FALLECIMIENTO), "%Y-%m")) %>% 
-  distinct(IDEVENTOCASO, .keep_all = TRUE) %>% 
-  group_by(grupo_etario,Periodos) %>% 
-  #mutate FECHA_FALLECIMIENTO to the first day of the month
-  count() %>%
-  mutate(fecha=as.Date(paste0(Periodos,"-01")))  %>%
-  ungroup() %>%
-  #create all possible combinations of grupo_etario and fecha (first day of each month for 2020,2021 and 2022), using n=0
-  complete(grupo_etario,fecha=seq.Date(as.Date("2020-03-01"),as.Date("2022-12-01"),by="month"),fill=list(n=0)) %>%
-  #remove the Periodos column
-  select(-Periodos)
+ #filter only with deaths
+   filter(!is.na(FECHA_FALLECIMIENTO)) %>%
+   filter(FECHA_FALLECIMIENTO<="2022-12-31") %>%
+   ungroup() %>% 
+   group_by(grupo_etario) %>%
+   mutate(Periodos = format(as.Date(FECHA_FALLECIMIENTO), "%Y-%m")) %>%
+   distinct(IDEVENTOCASO, .keep_all = TRUE) %>%
+   group_by(grupo_etario,Periodos) %>%
+   #mutate FECHA_FALLECIMIENTO to the first day of the month
+   count() %>%
+   mutate(fecha=as.Date(paste0(Periodos,"-01")))  %>%
+   ungroup() %>%
+   #create all possible combinations of grupo_etario and fecha (first day of each month for 2020,2021 and 2022), using n=0
+   complete(grupo_etario,fecha=seq.Date(as.Date("2020-03-01"),as.Date("2022-12-01"),by="month"),fill=list(n=0)) %>%
+   #remove the Periodos column
+   select(-Periodos)
 
-yearly_deaths<-monthly_deaths %>% 
-  mutate(anio=format(fecha,"%Y")) %>%
-  group_by(grupo_etario,anio) %>%
-  summarise(n=sum(n))  
+  #yearly_deaths<-monthly_deaths %>% 
+  #mutate(anio=format(fecha,"%Y")) %>%
+  #group_by(grupo_etario,anio) %>%
+  #summarise(n=sum(n))  
 
 monthly_cases <- datad %>% 
   ungroup() %>% 
@@ -83,9 +83,10 @@ monthly_cases <- datad %>%
 monthly_cases_table<-monthly_cases[,1:3] %>% ungroup()
 names(monthly_cases_table)<-c("Age group","Year-Month","Cases","Date")
 write.xlsx(monthly_cases_table,"Supp_Table_3_monthly_cases.xlsx")
-monthly_deaths_table<-monthly_deaths[,1:3] %>% ungroup()
-names(monthly_deaths_table)<-c("Age group","Year-Month","Deaths","Date")
-write.xlsx(monthly_deaths_table,"Supp_Table_4_monthly_deaths.xlsx")
+#SuppTable4 is now generated in the Fig2 script
+#monthly_deaths_table<-monthly_deaths[,1:3] %>% ungroup()
+#names(monthly_deaths_table)<-c("Age group","Year-Month","Deaths","Date")
+#write.xlsx(monthly_deaths_table,"Supp_Table_4_monthly_deaths.xlsx")
 
 #defino la paleta de colores para el grafico
 #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") #toda la gama

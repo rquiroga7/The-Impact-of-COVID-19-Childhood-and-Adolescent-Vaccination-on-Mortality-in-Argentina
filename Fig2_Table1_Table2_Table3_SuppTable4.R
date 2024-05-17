@@ -308,17 +308,24 @@ kable_out <- gsub(" 0(?![0-9])", " 0* ", kable_out, perl = TRUE)
 
 readr::write_file(kable_out, "Table2.html")
 
-#POSSIBLY WRITE SUPP TABLE 4 HERE FROM death_dataM 
+#WRITE SUPP TABLE 4 HERE FROM death_dataM 
 #COMPLETE CODE TO COMPLETE MONTHS WITH 0 and group accordingly
 death_dataM <- death_data7 %>%
-filter(fecha_fallecimiento<="2020-12-31") %>%
-  mutate(year = year(fecha_fallecimiento)) %>%
-  group_by(grupo_etario, year) %>%
-  mutate(novac_annual = cumsum(d0) + cumsum(d1), vac_annual = cumsum(d2plus)) %>%
-  summarise(novac_annual = max(novac_annual), vac_annual = max(vac_annual)) %>%
-  pivot_longer(cols = c(novac_annual, vac_annual), names_to = "vac", values_to = "deaths") %>%
-  mutate(vac = factor(vac, levels = c("novac_annual", "vac_annual"), labels = c("Non vaccinated", "Vaccinated")))
+  #group by months
+  mutate(monthd = floor_date(fecha_fallecimiento, "month")) %>%
+  group_by(grupo_etario, monthd) %>%
+  mutate(novac_monthly = cumsum(d0) + cumsum(d1), vac_monthly = cumsum(d2plus)) %>%
+  summarise(novac_monthly = max(novac_monthly), vac_monthly = max(vac_monthly)) %>%
+  pivot_longer(cols = c(novac_monthly, vac_monthly), names_to = "vac", values_to = "deaths") %>%
+  mutate(vac = factor(vac, levels = c("novac_monthly", "vac_monthly"), labels = c("Non vaccinated", "Vaccinated")))
 
+#Pivot long to wide
+death_dataM2<-death_dataM %>% pivot_wider(names_from = vac, values_from = deaths)
+names(death_dataM2)<-c("Age group","Year-Month","Non vaccinated deaths","Vaccinated deaths")
+#Format Year-Month column to show only year and month
+death_dataM2$`Year-Month`<-format(death_dataM2$`Year-Month`,"%Y-%m")
+#Write Supp Table 4
+write.xlsx(death_dataM2,"Supp_Table_4_monthly_deaths.xlsx")
 
 
 ###Create table 3, comorbilities
