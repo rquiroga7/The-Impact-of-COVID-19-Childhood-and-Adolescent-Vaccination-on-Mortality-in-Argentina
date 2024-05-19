@@ -303,20 +303,20 @@
 <polyline points='47.56,32.34 50.05,32.34 ' style='stroke-width: 0.48; stroke: #B3B3B3; stroke-linecap: butt;' />
 <text x='459.07' y='170.41' text-anchor='middle' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='18.89px' lengthAdjust='spacingAndGlyphs'>Date</text>
 <text transform='translate(25.67,76.38) rotate(-90)' text-anchor='middle' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='106.14px' lengthAdjust='spacingAndGlyphs'>Population vaccinated (%)</text>
-<rect x='268.10' y='180.37' width='381.93' height='27.24' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<text x='273.08' y='197.31' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='140.12px' lengthAdjust='spacingAndGlyphs'>COVID-19 Vaccine doses recieved</text>
-<rect x='433.06' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='434.79' y1='194.00' x2='448.62' y2='194.00' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
-<rect x='484.31' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='486.04' y1='194.00' x2='499.86' y2='194.00' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
-<rect x='535.55' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='537.28' y1='194.00' x2='551.10' y2='194.00' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
-<rect x='590.79' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='592.52' y1='194.00' x2='606.34' y2='194.00' style='stroke-width: 2.13; stroke: #56B4E9; stroke-linecap: butt;' />
-<text x='455.33' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='20.67px' lengthAdjust='spacingAndGlyphs'>0 dose</text>
-<text x='506.57' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='20.67px' lengthAdjust='spacingAndGlyphs'>1 dose</text>
-<text x='557.81' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='23.78px' lengthAdjust='spacingAndGlyphs'>2 doses</text>
-<text x='613.05' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>3+ doses</text>
+<rect x='262.10' y='180.37' width='393.93' height='27.24' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<text x='267.08' y='197.31' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='140.12px' lengthAdjust='spacingAndGlyphs'>COVID-19 Vaccine doses recieved</text>
+<rect x='427.06' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='428.79' y1='194.00' x2='442.62' y2='194.00' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
+<rect x='478.31' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='480.04' y1='194.00' x2='493.86' y2='194.00' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
+<rect x='537.55' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='539.28' y1='194.00' x2='553.10' y2='194.00' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
+<rect x='596.79' y='185.36' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='598.52' y1='194.00' x2='612.34' y2='194.00' style='stroke-width: 2.13; stroke: #56B4E9; stroke-linecap: butt;' />
+<text x='449.33' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='20.67px' lengthAdjust='spacingAndGlyphs'>0 dose</text>
+<text x='500.57' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>1+ doses</text>
+<text x='559.81' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>2+ doses</text>
+<text x='619.05' y='196.65' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>3+ doses</text>
 <text x='9.32' y='12.93' text-anchor='middle' style='font-size: 12.00px; font-family: "Times New Roman";' textLength='8.67px' lengthAdjust='spacingAndGlyphs'>A</text>
 </g>
 <defs>
@@ -382,7 +382,7 @@
 <polyline points='307.16,337.41 307.16,240.54 ' style='stroke-width: 0.48; stroke: #DEDEDE; stroke-linecap: butt;' />
 <polyline points='62.29,332.03 85.02,297.65 105.55,281.90 128.28,280.47 150.27,280.47 173.00,280.47 194.99,279.03 217.72,275.46 240.45,270.63 262.44,267.42 285.17,265.71 307.16,263.93 ' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
 <polyline points='62.29,332.03 85.02,332.03 105.55,332.03 128.28,332.03 150.27,332.03 173.00,332.03 194.99,332.03 217.72,332.03 240.45,332.03 262.44,332.03 285.17,332.03 307.16,332.03 ' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
-<polyline points='62.29,332.03 85.02,332.03 105.55,332.03 128.28,332.03 150.27,332.03 173.00,332.03 194.99,332.03 217.72,332.03 240.45,332.03 262.44,332.03 285.17,332.03 307.16,332.03 ' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
+<polyline points='62.29,332.03 85.02,332.03 105.55,332.03 128.28,332.03 150.27,332.03 173.00,332.03 194.99,332.03 217.72,332.03 240.45,332.03 262.44,332.03 285.17,332.03 307.16,332.03 ' style='stroke-width: 2.13; stroke: #009E73; stroke-dasharray: 19.92,8.54; stroke-linecap: butt;' />
 <rect x='50.05' y='240.54' width='269.36' height='96.87' style='stroke-width: 0.97; stroke: #B3B3B3;' />
 </g>
 <g clip-path='url(#cpMC4wMHw4NzMuMDd8MC4wMHw0MjUuMjA=)'>
@@ -439,8 +439,8 @@
 <polyline points='559.51,337.41 559.51,240.54 ' style='stroke-width: 0.48; stroke: #DEDEDE; stroke-linecap: butt;' />
 <polyline points='581.50,337.41 581.50,240.54 ' style='stroke-width: 0.48; stroke: #DEDEDE; stroke-linecap: butt;' />
 <polyline points='336.63,332.03 359.36,305.32 379.89,297.08 402.62,284.26 424.61,282.47 447.34,278.19 469.33,277.02 492.06,272.63 514.79,271.71 536.78,267.67 559.51,266.92 581.50,265.94 ' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
-<polyline points='336.63,332.03 359.36,331.21 379.89,330.83 402.62,330.83 424.61,330.44 447.34,330.45 469.33,330.45 492.06,330.46 514.79,330.46 536.78,330.46 559.51,330.47 581.50,330.47 ' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
-<polyline points='336.63,332.03 359.36,331.49 379.89,328.92 402.62,328.98 424.61,328.54 447.34,328.58 469.33,328.11 492.06,327.64 514.79,327.66 536.78,327.67 559.51,327.68 581.50,327.69 ' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
+<polyline points='336.63,332.03 359.36,330.81 379.89,328.42 402.62,328.44 424.61,327.66 447.34,327.68 469.33,327.30 492.06,326.92 514.79,326.93 536.78,326.94 559.51,326.94 581.50,326.95 ' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
+<polyline points='336.63,332.03 359.36,331.49 379.89,328.92 402.62,328.98 424.61,328.54 447.34,328.58 469.33,328.11 492.06,327.64 514.79,327.66 536.78,327.67 559.51,327.68 581.50,327.69 ' style='stroke-width: 2.13; stroke: #009E73; stroke-dasharray: 19.92,8.54; stroke-linecap: butt;' />
 <rect x='324.39' y='240.54' width='269.36' height='96.87' style='stroke-width: 0.97; stroke: #B3B3B3;' />
 </g>
 <g clip-path='url(#cpMC4wMHw4NzMuMDd8MC4wMHw0MjUuMjA=)'>
@@ -497,8 +497,8 @@
 <polyline points='833.85,337.41 833.85,240.54 ' style='stroke-width: 0.48; stroke: #DEDEDE; stroke-linecap: butt;' />
 <polyline points='855.85,337.41 855.85,240.54 ' style='stroke-width: 0.48; stroke: #DEDEDE; stroke-linecap: butt;' />
 <polyline points='610.97,332.03 633.70,283.38 654.23,270.90 676.96,269.57 698.95,263.80 721.68,263.20 743.67,262.73 766.40,252.38 789.13,252.07 811.12,251.85 833.85,251.68 855.85,251.44 ' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
-<polyline points='610.97,332.03 633.70,330.36 654.23,328.17 676.96,328.18 698.95,327.64 721.68,327.64 743.67,327.64 766.40,326.55 789.13,326.00 811.12,326.01 833.85,326.01 855.85,326.01 ' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
-<polyline points='610.97,332.03 633.70,330.72 654.23,328.82 676.96,328.85 698.95,328.88 721.68,328.89 743.67,327.02 766.40,327.03 789.13,327.04 811.12,327.05 833.85,326.43 855.85,326.43 ' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
+<polyline points='610.97,332.03 633.70,329.25 654.23,325.41 676.96,325.43 698.95,324.89 721.68,324.90 743.67,323.26 766.40,322.17 789.13,321.62 811.12,321.63 833.85,321.08 855.85,321.08 ' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
+<polyline points='610.97,332.03 633.70,330.72 654.23,328.82 676.96,328.85 698.95,328.88 721.68,328.89 743.67,327.02 766.40,327.03 789.13,327.04 811.12,327.05 833.85,326.43 855.85,326.43 ' style='stroke-width: 2.13; stroke: #009E73; stroke-dasharray: 19.92,8.54; stroke-linecap: butt;' />
 <rect x='598.73' y='240.54' width='269.36' height='96.87' style='stroke-width: 0.97; stroke: #B3B3B3;' />
 </g>
 <g clip-path='url(#cpMC4wMHw4NzMuMDd8MC4wMHw0MjUuMjA=)'>
@@ -628,17 +628,17 @@
 <text x='459.07' y='383.01' text-anchor='middle' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='18.89px' lengthAdjust='spacingAndGlyphs'>Date</text>
 <text transform='translate(20.27,288.98) rotate(-90)' text-anchor='middle' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='74.74px' lengthAdjust='spacingAndGlyphs'>Cumulative deaths</text>
 <text transform='translate(31.07,288.98) rotate(-90)' text-anchor='middle' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='80.60px' lengthAdjust='spacingAndGlyphs'>per 100k population</text>
-<rect x='295.72' y='392.97' width='326.69' height='27.24' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<text x='300.70' y='409.91' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='140.12px' lengthAdjust='spacingAndGlyphs'>COVID-19 Vaccine doses recieved</text>
-<rect x='460.69' y='397.95' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='462.41' y1='406.59' x2='476.24' y2='406.59' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
-<rect x='511.93' y='397.95' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='513.66' y1='406.59' x2='527.48' y2='406.59' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
-<rect x='563.17' y='397.95' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
-<line x1='564.90' y1='406.59' x2='578.72' y2='406.59' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
-<text x='482.95' y='409.24' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='20.67px' lengthAdjust='spacingAndGlyphs'>0 dose</text>
-<text x='534.19' y='409.24' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='20.67px' lengthAdjust='spacingAndGlyphs'>1 dose</text>
-<text x='585.43' y='409.24' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>2+ doses</text>
+<rect x='291.72' y='392.97' width='334.69' height='27.24' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<text x='296.70' y='409.91' style='font-size: 10.00px; font-family: "Times New Roman";' textLength='140.12px' lengthAdjust='spacingAndGlyphs'>COVID-19 Vaccine doses recieved</text>
+<rect x='456.69' y='397.95' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='458.41' y1='406.59' x2='472.24' y2='406.59' style='stroke-width: 2.13; stroke: #D55E00; stroke-linecap: butt;' />
+<rect x='507.93' y='397.95' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='509.66' y1='406.59' x2='523.48' y2='406.59' style='stroke-width: 2.13; stroke: #E69F00; stroke-linecap: butt;' />
+<rect x='567.17' y='397.95' width='17.28' height='17.28' style='stroke-width: 0.97; stroke: none; fill: #FFFFFF;' />
+<line x1='568.90' y1='406.59' x2='582.72' y2='406.59' style='stroke-width: 2.13; stroke: #009E73; stroke-linecap: butt;' />
+<text x='478.95' y='409.24' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='20.67px' lengthAdjust='spacingAndGlyphs'>0 dose</text>
+<text x='530.19' y='409.24' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>1+ doses</text>
+<text x='589.43' y='409.24' style='font-size: 8.00px; font-family: "Times New Roman";' textLength='28.30px' lengthAdjust='spacingAndGlyphs'>2+ doses</text>
 <text x='9.32' y='225.53' text-anchor='middle' style='font-size: 12.00px; font-family: "Times New Roman";' textLength='8.01px' lengthAdjust='spacingAndGlyphs'>B</text>
 </g>
 </svg>
