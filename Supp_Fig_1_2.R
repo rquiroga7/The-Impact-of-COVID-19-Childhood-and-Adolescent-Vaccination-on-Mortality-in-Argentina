@@ -157,18 +157,19 @@ final_df2b<-rbind(final_df2b,nodose) %>% arrange(fecha_aplicacion,grupo_etario)
 final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(nombre_dosis_generica=="0 dose",100-cumulative_count_perc,cumulative_count_perc))
 #Limit upper end of vaccinated to 100. Since we consider static population numbers, the total number of vaccinated per age group can exceed population
 final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(cumulative_count_perc>100,100,cumulative_count_perc))
+final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(cumulative_count_perc<0,0,cumulative_count_perc))
 # Create the plots
 plot <- ggplot(final_df2b %>% filter(grupo_etario=="0-2"), aes(x = fecha_aplicacion, y = cumulative_count_perc, color = nombre_dosis_generica)) +
   geom_line() +
   facet_wrap(~jurisdiccion_residencia, ncol = 4) +
   labs(x = "Date", y = "Cumulative % of population", color = "Doses recieved") +
-  ggtitle("Pediatric Vaccination coverage by province for 0-2 year old age group") +
+  ggtitle("Pediatric vaccination coverage by province for 0-2 year old age group") +
   #scale_y limits the y axis to 0-100
   scale_y_continuous(limits = c(0, 100)) +
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
-  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
+  scale_x_date(date_breaks = "3 months", minor_breaks = "1 month", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
-  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
+  theme(text = element_text(family = "Times"), axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   #scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
     #Okabe-Ito colorblind friendly palette
   scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
@@ -180,13 +181,13 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="3-11"), aes(x = fecha_aplica
   geom_line() +
   facet_wrap(~jurisdiccion_residencia, ncol = 4) +
   labs(x = "Date", y = "Cumulative % of population", color = "Doses recieved") +
-  ggtitle("Pediatric Vaccination coverage by province for 3-11 year old age group") +
+  ggtitle("Pediatric vaccination coverage by province for 3-11 year old age group") +
   #scale_y limits the y axis to 0-100
   scale_y_continuous(limits = c(0, 100)) +
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
-  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
+  scale_x_date(date_breaks = "3 months", minor_breaks = "1 month", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
-  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
+  theme(text = element_text(family = "Times"), axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   #scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
     #Okabe-Ito colorblind friendly palette
   scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
@@ -198,13 +199,13 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplic
   geom_line() +
   facet_wrap(~jurisdiccion_residencia, ncol = 4) +
   labs(x = "Date", y = "Cumulative % of population", color = "Doses recieved") +
-  ggtitle("Pediatric Vaccination coverage by province for 12-17 year old age group") +
+  ggtitle("Pediatric vaccination coverage by province for 12-17 year old age group") +
   #scale_y limits the y axis to 0-100
   scale_y_continuous(limits = c(0, 100)) +
   #Adds x axis labels for every 6 months as %Y-%m, rotated 90 degrees
-  scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
+  scale_x_date(date_breaks = "3 months", minor_breaks = "1 month", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
-  theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
+  theme(text = element_text(family = "Times"), axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   #scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
   #Okabe-Ito colorblind friendly palette
   scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
