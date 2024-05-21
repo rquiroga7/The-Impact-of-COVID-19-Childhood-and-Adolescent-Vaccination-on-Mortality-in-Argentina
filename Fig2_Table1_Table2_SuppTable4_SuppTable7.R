@@ -7,6 +7,7 @@ library(cowplot)
 library(lubridate)
 library(cowplot)
 library(openxlsx)
+library(ggrepel)
 
 data1 <- read_excel("./Data/fall_1.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "text", rep("text", 31)))
 data1$FECHA_FALLECIMIENTO<-as.Date(data1$FECHA_FALLECIMIENTO,format="%d/%m/%Y")
@@ -172,7 +173,7 @@ levels(death_data7$grupo_etario)<-c("0-2 years old","3-11 years old","12-17 year
 
 #death_data7b <- death_data7 %>% mutate(vax=ifelse(!is.na(cumulative_vax),cumulative_vax,0),unvax=ifelse(!is.na(poblacion) & !is.na(cumulative_vax),poblacion-cumulative_vax,poblacion))
 death_data7b <- death_data7 %>% 
-    filter(fecha_fallecimiento>="2022-01-01" & fecha_fallecimiento<"2023-01-01") %>%
+    filter(fecha_fallecimiento>="2021-12-01" & fecha_fallecimiento<"2023-01-01") %>%
     #Keep only rows with fecha_fallecimiento in date_seq
     filter(fecha_fallecimiento %in% date_seq) %>%
     group_by(grupo_etario) %>%
@@ -202,19 +203,38 @@ death_data7c <- death_data7b %>%
 
 
 #Cumulative death plot by vaccination status
+
+# Get the last date for each group
+last_dates <- death_data7c %>% 
+  ungroup() %>%
+  filter(fecha_fallecimiento <= as.Date("2022-12-01")) %>%
+  filter(fecha_fallecimiento == max(fecha_fallecimiento)) %>%
+  filter(vac == "0 dose" | vac == "1+ doses" | vac == "2+ doses" | vac == "3+ doses") %>%
+  group_by(grupo_etario, vac) 
+
+# Define the breaks and labels for the x-axis
+breaks <- seq(as.Date("2022-01-01"), as.Date("2023-01-01"), by = "1 month")
+labels <- c(format(breaks[1:length(breaks) - 1], "%b-%Y"), "")
+
+#Delete rows with grupo_etario=="0-2 years old" and vac=="1+ doses" and vac=="2+ doses", 
+# since it does not make sense to calculate incidence for these groups, for there are 0 deaths
+death_data7c<-death_data7c %>% filter(!(grupo_etario=="0-2 years old" & vac=="1+ doses") & !(grupo_etario=="0-2 years old" & vac=="2+ doses"))
+
 mort_vac_plot<-ggplot(death_data7c %>% filter(vac == "0 dose" | vac == "1+ doses" | vac == "2+ doses" | vac == "3+ doses"), aes(x = fecha_fallecimiento, y = cumulative_incidence, color = vac, linetype = vac)) +
   geom_line(size=1) +
+  geom_label_repel(data = last_dates, aes(label = sprintf("bold('%.2f')", round(cumulative_incidence, 2))), parse = TRUE , direction = "y", force=0.5, show.legend = FALSE,size=2, xlim = c(as.Date("2023-01-20"), NA),     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = 0,     segment.ncp = 3,     segment.angle = 45) +
   labs(x = "Date", y = "Cumulative deaths\nper 100k population", color = "COVID-19 Vaccine doses recieved") +
   facet_wrap(~grupo_etario) +
-  scale_y_continuous(limits = c(0, 4),breaks = seq(0, 4, 0.5),expand=c(0,0.25)) +
-  scale_x_date(date_labels = "%b-%Y",date_breaks = "1 month",limits = c(as.Date("2022-01-01"), as.Date("2022-12-01"))) +
+  scale_y_continuous(limits = c(0, 4.5),breaks = seq(0, 4.5, 0.5),expand=c(0,0.25)) +
+  scale_x_date(breaks = breaks, labels = labels, limits = c(as.Date("2022-01-01"), as.Date("2023-01-01"))) +
   theme_light(base_size=10)+
   theme(text = element_text(family = "Times New Roman"),strip.background = element_rect(fill="gray90",color="black",size=1),strip.text = element_text(face="bold", color="black"),plot.title = element_text(face="bold",hjust = 0.5),legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   labs(tag="B")+
   scale_color_manual(values = c("0 dose" = "#D55E00","1+ doses" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))+
   #with no legend for linetype
   scale_linetype_manual(values = c("0 dose" = "solid","1+ doses" = "solid", "2 doses" = "solid", "2+ doses" = "longdash", "3+ doses" = "solid"),guide = "none")
-  #Save png
+
+#Save png
 mort_vac_plot
 #ggsave("cum_incidence_by_vac_status_0_1_2.png", width = 154, height = 77, units = "mm", dpi = 300)
 
@@ -238,23 +258,28 @@ nodose<-final_df2 %>% filter(nombre_dosis_generica=="1+ doses") %>% mutate(nombr
 final_df2<-rbind(final_df2,nodose) %>% arrange(fecha_aplicacion,grupo_etario)
 #change the pct_vac value for nombre_dosis_generica== "0 dose" to 100-pct_vac
 final_df2<-final_df2 %>% mutate(pct_vac=ifelse(nombre_dosis_generica=="0 dose",100-pct_vac,pct_vac))
-#Rearrange nombre_dosis_generica levels to "0 dose","1 dose","2 doses","3+ doses"
+#Rearrange nombre_dosis_generica levels to "0 dose","1+ doses","2+ doses","3+ doses"
 final_df2$nombre_dosis_generica<-factor(final_df2$nombre_dosis_generica,levels=c("0 dose","1+ doses","2+ doses","3+ doses"))
 
 
 # Create the plot
+
+# Get the last date for each group
+last_dates <- final_df2 %>% 
+  group_by(grupo_etario,nombre_dosis_generica) %>% 
+  filter(fecha_aplicacion == max(fecha_aplicacion))
+# Define the breaks and labels for the x-axis
+breaks <- seq(as.Date("2022-01-01"), as.Date("2023-01-01"), by = "1 month")
+labels <- c(format(breaks[1:length(breaks) - 1], "%b-%Y"), "")
+
 plot_vac <- ggplot(final_df2, aes(x = fecha_aplicacion, y = pct_vac, color = nombre_dosis_generica)) +
   geom_line(size=1) +
+  geom_label_repel(data = last_dates, aes(label = sprintf("bold('%i%%')", round(pct_vac, 0))), parse = TRUE, direction = "y", force=1.0, show.legend = FALSE,size=2, xlim = c(as.Date("2023-01-20"), NA),     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = -0.1,     segment.ncp = 3,     segment.angle = 45) +
   facet_wrap(~grupo_etario) +
-  #y scale limits 0,100
-  #limit x axis to 2023-01-01
-  scale_x_date(date_labels = "%b-%Y",date_breaks = "1 month",limits = c(as.Date("2022-01-01"), as.Date("2022-12-01"))) +
-  #set y scale breaks to 10
+  scale_x_date(breaks = breaks, labels = labels, limits = c(as.Date("2022-01-01"), as.Date("2023-01-01"))) +
   scale_y_continuous(limits = c(0, 100),breaks = seq(0, 100, 20),expand=c(0,5)) +
   labs(x = "Date", y = 'Population vaccinated (%)', color = 'COVID-19 Vaccine doses recieved') +
-  #ggtitle("Pediatric COVID-19 vaccination coverage for each age group") +
   theme_light(base_size=10)+
-  #legend at bottom, rotate x axis marks 90 degrees
   theme(text = element_text(family = "Times New Roman"),strip.background = element_rect(fill="gray90",color="black",size=1),strip.text = element_text(face="bold", color="black"),plot.title = element_text(hjust = 0.5),legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   labs(tag="A")+
   scale_color_manual(values = c("0 dose" = "#D55E00","1+ doses" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
@@ -264,8 +289,8 @@ plot_vac
 
 fig2<-plot_grid(plot_vac,mort_vac_plot, ncol=1, align="v")
 fig2
-ggsave("Fig2.png", width = 154, height = 75, units = "mm", dpi = 300, scale = 2)
-ggsave("Fig2.svg", width = 154, height = 75, units = "mm", dpi = 300, scale = 2)
+ggsave("Fig2.png", width = 154, height = 75, units = "mm", dpi = 600, scale = 2)
+ggsave("Fig2.svg", width = 154, height = 75, units = "mm", dpi = 600, scale = 2)
 
 #Write Table 1 of vaccination coverage by age group at end of 2022
 #Select columns output xlsx table
@@ -403,4 +428,4 @@ names(counts2)<-c("Comorbidity","Count")
 
 library(openxlsx)
 #write_csv(counts2,"Table3.csv")
-write.xlsx(counts2,"Table3.xlsx")
+write.xlsx(counts2,"Supp_Table7.xlsx")
