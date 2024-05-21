@@ -8,6 +8,7 @@ library(lubridate)
 library(cowplot)
 library(openxlsx)
 library(ggrepel)
+library(ggpp)
 
 data1 <- read_excel("./Data/fall_1.xlsx", col_types = c("text", "text", "numeric", "text", "text", "text", "date", "text", "text", "text", "text", rep("text", 31)))
 data1$FECHA_FALLECIMIENTO<-as.Date(data1$FECHA_FALLECIMIENTO,format="%d/%m/%Y")
@@ -222,15 +223,18 @@ death_data7c<-death_data7c %>% filter(!(grupo_etario=="0-2 years old" & vac=="1+
 
 mort_vac_plot<-ggplot(death_data7c %>% filter(vac == "0 dose" | vac == "1+ doses" | vac == "2+ doses" | vac == "3+ doses"), aes(x = fecha_fallecimiento, y = cumulative_incidence, color = vac, linetype = vac)) +
   geom_line(size=1) +
-  geom_label_repel(data = last_dates, aes(label = sprintf("bold('%.2f')", round(cumulative_incidence, 2))), parse = TRUE , direction = "y", force=0.5, show.legend = FALSE,size=2, xlim = c(as.Date("2023-01-20"), NA),     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = 0,     segment.ncp = 3,     segment.angle = 45) +
+  #geom_label_repel(data = last_dates, aes(label = sprintf("bold('%.2f')", round(cumulative_incidence, 2))), parse = TRUE , direction = "y", force=0.5, show.legend = FALSE,size=4, xlim = c(as.Date("2023-01-30"), NA),     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = 0,     segment.ncp = 3,     segment.angle = 45) +
+   geom_label_repel(data = last_dates, aes(label = sprintf("bold('%.2f')", round(cumulative_incidence, 2))), parse = TRUE , direction = "y", force=0.5, show.legend = FALSE,size=4, position = position_nudge_to(x = as.Date("2023-01-15")),     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = 0,     segment.ncp = 3,     segment.angle = 45) +
   labs(x = "Date", y = "Cumulative deaths\nper 100k population", color = "COVID-19 Vaccine doses recieved") +
   facet_wrap(~grupo_etario) +
   scale_y_continuous(limits = c(0, 4.5),breaks = seq(0, 4.5, 0.5),expand=c(0,0.25)) +
-  scale_x_date(breaks = breaks, labels = labels, limits = c(as.Date("2022-01-01"), as.Date("2023-01-01"))) +
-  theme_light(base_size=10)+
+  scale_x_date(breaks = breaks, labels = labels, limits = c(as.Date("2022-01-01"), as.Date("2023-01-15"))) +
+  theme_light(base_size=14)+
   theme(text = element_text(family = "Times New Roman"),strip.background = element_rect(fill="gray90",color="black",size=1),strip.text = element_text(face="bold", color="black"),plot.title = element_text(face="bold",hjust = 0.5),legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   labs(tag="B")+
-  scale_color_manual(values = c("0 dose" = "#D55E00","1+ doses" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))+
+  #Okabe-Ito colorblind friendly palette
+  scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))+
+  #scale_color_manual(values = c("0 dose" = "#D55E00","1+ doses" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))+
   #with no legend for linetype
   scale_linetype_manual(values = c("0 dose" = "solid","1+ doses" = "solid", "2 doses" = "solid", "2+ doses" = "longdash", "3+ doses" = "solid"),guide = "none")
 
@@ -272,25 +276,30 @@ last_dates <- final_df2 %>%
 breaks <- seq(as.Date("2022-01-01"), as.Date("2023-01-01"), by = "1 month")
 labels <- c(format(breaks[1:length(breaks) - 1], "%b-%Y"), "")
 
+
 plot_vac <- ggplot(final_df2, aes(x = fecha_aplicacion, y = pct_vac, color = nombre_dosis_generica)) +
   geom_line(size=1) +
-  geom_label_repel(data = last_dates, aes(label = sprintf("bold('%i%%')", round(pct_vac, 0))), parse = TRUE, direction = "y", force=1.0, show.legend = FALSE,size=2, xlim = c(as.Date("2023-01-20"), NA),     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = -0.1,     segment.ncp = 3,     segment.angle = 45) +
+  #geom_label_repel(data = last_dates, aes(label = sprintf("bold('%i%%')", round(pct_vac, 0))), parse = TRUE, direction = "y", force=0.9, show.legend = FALSE,size=4, xlim = c(as.Date("2023-01-30"), NA), max.iter = 100,     hjust = 0,     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = 0,     segment.ncp = 3,     segment.angle = 45) +
+  geom_label_repel(data = last_dates, aes(label = sprintf("bold('%i%%')", round(pct_vac, 0))), parse = TRUE, direction = "y", show.legend = FALSE, size=4, position = position_nudge_to(x = as.Date("2023-01-15")) , hjust = "left",     segment.size = .6,     segment.alpha = .9,     segment.linetype = "dotted",     box.padding = .2,     segment.curvature = 0,     segment.ncp = 3,     segment.angle = 45) +
+  
   facet_wrap(~grupo_etario) +
-  scale_x_date(breaks = breaks, labels = labels, limits = c(as.Date("2022-01-01"), as.Date("2023-01-01"))) +
+  scale_x_date(breaks = breaks, labels = labels, limits = c(as.Date("2022-01-01"), as.Date("2023-01-15"))) +
   scale_y_continuous(limits = c(0, 100),breaks = seq(0, 100, 20),expand=c(0,5)) +
   labs(x = "Date", y = 'Population vaccinated (%)', color = 'COVID-19 Vaccine doses recieved') +
-  theme_light(base_size=10)+
+  theme_light(base_size=14)+
   theme(text = element_text(family = "Times New Roman"),strip.background = element_rect(fill="gray90",color="black",size=1),strip.text = element_text(face="bold", color="black"),plot.title = element_text(hjust = 0.5),legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+
   labs(tag="A")+
-  scale_color_manual(values = c("0 dose" = "#D55E00","1+ doses" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+  #scale_color_manual(values = c("0 dose" = "#D55E00","1+ doses" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+  #Okabe-Ito colorblind friendly palette
+  scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
 
 plot_vac
-#ggsave("vaccination_plot.png", width = 154, height = 77, units = "mm", dpi = 300)
+#ggsave("vaccination_plot.png", width = 154, height = 154, units = "mm", dpi = 300)
 
 fig2<-plot_grid(plot_vac,mort_vac_plot, ncol=1, align="v")
 fig2
-ggsave("Fig2.png", width = 154, height = 75, units = "mm", dpi = 600, scale = 2)
-ggsave("Fig2.svg", width = 154, height = 75, units = "mm", dpi = 600, scale = 2)
+ggsave("Fig2.png", width = 154, height = 103, units = "mm", dpi = 600, scale = 2)
+ggsave("Fig2.svg", width = 154, height = 103, units = "mm", dpi = 600, scale = 2)
 
 #Write Table 1 of vaccination coverage by age group at end of 2022
 #Select columns output xlsx table

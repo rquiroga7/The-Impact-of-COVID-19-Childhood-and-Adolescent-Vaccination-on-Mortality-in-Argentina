@@ -149,7 +149,12 @@ final_df2 <- final_df %>%
 #Change factor levels of nombre_dosis_generica
 final_df2b<-final_df2
 final_df2b$nombre_dosis_generica <- as.factor(final_df2b$nombre_dosis_generica)
-levels(final_df2b$nombre_dosis_generica)<- c("1 dose", "2 doses", "3+ doses")
+levels(final_df2b$nombre_dosis_generica)<- c("1+ doses", "2+ doses", "3+ doses")
+
+nodose<-final_df2b %>% filter(nombre_dosis_generica=="1+ doses") %>% mutate(nombre_dosis_generica="0 dose")
+final_df2b<-rbind(final_df2b,nodose) %>% arrange(fecha_aplicacion,grupo_etario)
+#change the pct_vac value for nombre_dosis_generica== "0 dose" to 100-pct_vac
+final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(nombre_dosis_generica=="0 dose",100-cumulative_count_perc,cumulative_count_perc))
 #Limit upper end of vaccinated to 100. Since we consider static population numbers, the total number of vaccinated per age group can exceed population
 final_df2b<-final_df2b %>% mutate(cumulative_count_perc=ifelse(cumulative_count_perc>100,100,cumulative_count_perc))
 # Create the plots
@@ -164,7 +169,9 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="0-2"), aes(x = fecha_aplicac
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
   theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
-  scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+  #scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+    #Okabe-Ito colorblind friendly palette
+  scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
 plot
 #save plot to file
 ggsave("Supp_Fig1A.png", plot, width = 12, height = 8, units = "in", dpi = 300)
@@ -180,7 +187,9 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="3-11"), aes(x = fecha_aplica
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
   theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
-  scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+  #scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+    #Okabe-Ito colorblind friendly palette
+  scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
 plot
 #save plot to file
 ggsave("Supp_Fig1B.png", plot, width = 12, height = 8, units = "in", dpi = 300)
@@ -196,7 +205,9 @@ plot <- ggplot(final_df2b %>% filter(grupo_etario=="12-17"), aes(x = fecha_aplic
   scale_x_date(date_breaks = "6 months", date_labels = "%Y-%m", expand = c(0, 0)) +
   theme_bw() +
   theme(text = element_text(family = "Times"),axis.text.x=element_text(angle=90,hjust=1))+
-  scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+  #scale_color_manual(values = c("0 dose" = "#D55E00","1 dose" = "#E69F00", "2 doses" = "#009E73", "2+ doses" = "#009E73", "3+ doses" = "#56B4E9"))
+  #Okabe-Ito colorblind friendly palette
+  scale_color_manual(values = c("0 dose" = "#000000", "1+ doses" = "#e69f00", "2+ doses" = "#56b4e9", "3+ doses" = "#0071b2"))
 plot
 ggsave("Supp_Fig1C.png", plot, width = 12, height = 8, units = "in", dpi = 300)
 
