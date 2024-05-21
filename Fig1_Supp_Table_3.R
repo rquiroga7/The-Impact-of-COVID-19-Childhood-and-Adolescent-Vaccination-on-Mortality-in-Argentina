@@ -7,9 +7,11 @@ library(vistime)
 library(patchwork)
 library(highcharter)
 library(cowplot)
+#remotes::install_github("taylordunn/dunnr")
 library(dunnr)
 library(readr)
 library(xlsx)
+library(tidyverse)
 
 #CARGO BASE
 
@@ -90,7 +92,9 @@ write.xlsx(monthly_cases_table,"Supp_Table_3_monthly_cases.xlsx")
 
 #defino la paleta de colores para el grafico
 #cbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7") #toda la gama
-cbPalette <- c("#56B4E9", "#009E73", "#D55E00")
+#Use Okabe-Ito colorblind friendly palette https://jfly.uni-koeln.de/color/#pallet
+#cbPalette <- c("#56B4E9", "#009E73", "#D55E00")
+cbPalette <- c("#d55e00", "#009E73", "#F5C710")
 
 
 
@@ -113,7 +117,7 @@ deaths<-monthly_deaths %>%
 cases<-monthly_cases %>%
   ggplot() +
   geom_col(aes(x=fecha, y=n, fill = factor(grupo_etario, levels= c("12-17","3-11","0-2")))) +
-  geom_text(family="Times New Roman",aes(fecha, label_y, label = label_y), vjust = 0.5, hjust=0, angle=90,
+  geom_text(family="Times New Roman",aes(fecha, label_y, label = label_y), vjust = 0.5, hjust=0, angle=90, nudge_y = 2000,
             data = . %>% group_by(fecha) %>% summarise(label_y = sum(n))) +
   scale_fill_manual(values=cbPalette) +
   scale_x_date(date_breaks = "1 month", date_labels = "%Y-%m", expand = c(0.01,0.01)) +
@@ -146,6 +150,6 @@ p<-gg_vistime(timeline_data)+
 # Combine the plots using cowplot
 set_geom_fonts(family="Times New Roman", ggrepel= TRUE)
 fig1<-plot_grid(cases,deaths, p, ncol=1, align="v")
-ggsave("Fig1.svg", width = 154, height = 154, units = "mm", dpi = 300, scale = 2)
-ggsave("Fig1.png", width = 154, height = 154, units = "mm", dpi = 300, scale = 2)
+ggsave("Fig1.svg", width = 154, height = 154, units = "mm", dpi = 600, scale = 2)
+ggsave("Fig1.png", width = 154, height = 154, units = "mm", dpi = 600, scale = 2)
 
