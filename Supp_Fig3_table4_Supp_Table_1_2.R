@@ -381,8 +381,8 @@ yearly_inf$ICD10_groups_nocode <- gsub("\\s\\(.*", "", yearly_inf$ICD10_groups_n
 yearly_inf$ICD10_groups_nocode <- stringr::str_wrap(yearly_inf$ICD10_groups_nocode, 23)
 bumpplotnocode(yearly_inf %>% filter(anio_def>=2015))
 #ggsave("0_14_mortality_inf_bumpplot_nocode.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
-ggsave("Fig3.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
-ggsave("Fig3.svg", width = 154, height = 77*1.5, units = "mm", dpi = 300)
+ggsave("Supp_Fig3.png", width = 154, height = 77*1.5, units = "mm", dpi = 300)
+ggsave("Supp_Fig3.svg", width = 154, height = 77*1.5, units = "mm", dpi = 300)
 
 
 #Generate table of deaths by group
