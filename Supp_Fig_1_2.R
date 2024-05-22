@@ -303,6 +303,10 @@ vp <- viewport()
 sbvp <- viewport(0.57, 0.408, width = 0.15, height = 0.15)
 pdf("Supp_Fig_2A.pdf", width = 15, height = 10); print(ss) ; print(inset, vp=sbvp); dev.off()
 
+#try to output with ggsave
+#final_plot <- plot_grid(ss, inset, rel_widths = c(0.1), rel_heights = c(0.1),hjust=0,vjust=0)
+#ggsave(filename = "Supp_Fig_2A.png", plot = final_plot, width = 15, height = 10, dpi = 300)
+
 #Create map for 3-11 year olds
 data <- final_df4 %>% arrange(jurisdiccion_residencia) %>% filter(grupo_etario=="3-11" & nombre_dosis_generica=="2da" & fecha_aplicacion <=as.Date('2023-01-01')) 
 mins=0;maxs=90
